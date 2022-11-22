@@ -1,9 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Kurale&family=Lato:wght@400;700&family=Poppins:wght@700&family=Raleway:wght@500&family=Roboto:wght@100;400&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 html,
 body {
   padding: 0;
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+.text-shadow {
+  /* text-shadow:
+    1px 0 #000,  
+    -1px 0 #000,
+    0 1px #000,
+    0 -1px #000,
+    1px 1px #000,
+    -1px -1px #000,
+    -1px 1px #000,
+    1px -1px #000,
+    0 0 #000; */
+  /* filter: drop-shadow(0 0 #000);
+  scale: 0.9; */
+  /* -webkit-text-stroke-width: 0.1px;
+  -webkit-text-stroke-color: black; */
+  -webkit-text-stroke-width: 0.5px;
+  -webkit-text-stroke-color: black;
 }
 
 a {
@@ -23,4 +47,16 @@ a {
     color: white;
     background: black;
   }
+}
+
+::-webkit-resizer {
+  border: 2px solid yellow;
+  background: blue;
+  box-shadow: 0 0 2px 5px red;
+  outline: 2px dashed green;
+
+  /*size does not work*/  
+  display:block;  
+  width: 150px !important;
+  height: 150px !important;
 }
