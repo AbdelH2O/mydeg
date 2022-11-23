@@ -205,12 +205,12 @@ const Degree = () => {
                     draggable={true}
                     // edgeTypes={edgeTypes}
                 >
-                    <Controls 
+                    {/* <Controls 
                         className='ml-7'
                         showInteractive={false}
                         // showZoom={false}
                         position='top-left'
-                    />
+                    /> */}
                     <Background 
                         color="#000"
                     />
