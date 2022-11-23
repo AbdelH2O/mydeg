@@ -32,14 +32,90 @@ const SideBar = (
                 <div className="w-full h-full flex flex-col justify-start items-center">
                     {
                         show ?
-                        <div
-                            className="bg-cyan-200 border-2 border-black w-32 h-10 mt-5 flex justify-center"
-                            style={{ boxShadow: '-3px 5px #000' }}
-                        >
-                            <div className="flex flex-row justify-center items-center align-middle">
-                                <p className="text-white bg-black px-1 rounded font-JetBrainsMono">BSCSC</p>
+                        <>
+                            <div className="w-full h-28 bg-sky-100 flex flex-col justify-center items-center">
+                                <div
+                                    className="w-32 h-28 my-5 flex justify-center rounded"
+                                    // style={{ boxShadow: '-3px 5px #000' }}
+                                >
+                                    <div className="flex flex-row justify-center items-center align-middle h-fit my-auto rounded shadow-[-3px_5px_#000]">
+                                        <p
+                                            className="font-JetBrainsMono font-bold px-8 py-4 rounded text-2xl text-white border-2 border-black"
+                                            style={{
+                                                background: 'linear-gradient(to right, #b91c1c, #6d28d9, #ca8a04, #b91c1c)',
+                                                // WebkitBackgroundClip: 'text',
+                                                // WebkitTextFillColor: 'transparent',
+                                                // whiteSpace: 'nowrap',
+                                                backgroundSize: '200%',
+                                                animation: 'background-pan 1.5s linear infinite',
+                                            }}
+                                        >
+                                            BSCSC
+                                        </p>
+                                    </div>
+                                </div> 
                             </div>
-                        </div> :
+                            <div className="border-b w-full border-neutral-300 shadow-2xl"></div>
+                            <div className="flex-auto w-full overflow-y-scroll">
+                                <div className="min-h-[18vh] mx-4 rounded mt-4">
+                                        <div className="font-Poppins font-bold w-full h-10 flex flex-row rounded shadow-md justify-center items-center text-black bg-white border border-b-neutral-300">
+                                            Freshman S1
+                                        </div>
+                                    <div className="grid grid-cols-2 grid-rows-[75px_minmax(100px,_1fr)_100px] gap-2 m-2 bg-white">
+                                        <div className="h-30 border border-dashed border-green-300 rounded flex justify-center items-center bg-green-100 cursor-pointer">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height={40} width={40} fill={'#16a34a'}>
+                                                <g data-name="Layer 2">
+                                                    <g data-name="plus-circle">
+                                                        <rect width="24" height="24" opacity="0"/>
+                                                        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm3 11h-2v2a1 1 0 0 1-2 0v-2H9a1 1 0 0 1 0-2h2V9a1 1 0 0 1 2 0v2h2a1 1 0 0 1 0 2z"/>
+                                                    </g>
+                                                </g>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="border-b w-full border-neutral-300 shadow-2xl"></div>
+                                <div className="min-h-[18vh] mx-4 rounded mt-4">
+                                        <div className="font-Poppins font-bold w-full h-10 flex flex-row rounded shadow-md justify-center items-center text-black bg-white border border-b-neutral-300">
+                                            Freshman S2
+                                        </div>
+                                    <div className="grid grid-cols-2 grid-rows-[75px_minmax(100px,_1fr)_100px] gap-2 m-2 bg-white">
+                                        <div className="h-30 border border-dashed border-green-300 rounded flex justify-center items-center bg-green-100 cursor-pointer">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height={40} width={40} fill={'#16a34a'}>
+                                                <g data-name="Layer 2">
+                                                    <g data-name="plus-circle">
+                                                        <rect width="24" height="24" opacity="0"/>
+                                                        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm3 11h-2v2a1 1 0 0 1-2 0v-2H9a1 1 0 0 1 0-2h2V9a1 1 0 0 1 2 0v2h2a1 1 0 0 1 0 2z"/>
+                                                    </g>
+                                                </g>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="border-b w-full border-neutral-300 shadow-2xl"></div>
+                                <div className="min-h-[18vh] mx-4 rounded mt-4">
+                                        <div className="font-Poppins font-bold w-full h-10 flex flex-row rounded shadow-md justify-center items-center text-black bg-white border border-b-neutral-300">
+                                            Sophomore S1
+                                        </div>
+                                    <div className="grid grid-cols-2 grid-rows-[75px_minmax(100px,_1fr)_100px] gap-2 m-2 bg-white">
+                                        <div className="h-30 border border-dashed border-green-300 rounded flex justify-center items-center bg-green-100 cursor-pointer">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height={40} width={40} fill={'#16a34a'}>
+                                                <g data-name="Layer 2">
+                                                    <g data-name="plus-circle">
+                                                        <rect width="24" height="24" opacity="0"/>
+                                                        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm3 11h-2v2a1 1 0 0 1-2 0v-2H9a1 1 0 0 1 0-2h2V9a1 1 0 0 1 2 0v2h2a1 1 0 0 1 0 2z"/>
+                                                    </g>
+                                                </g>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="border-b w-full border-neutral-300 shadow-2xl"></div>
+                                
+                                <div className="w-32 bg-green-100 h-20 px-4">
+                                </div>
+                            </div>
+                        </> :
                         <></>
                     }
                 </div>

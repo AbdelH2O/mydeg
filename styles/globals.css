@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Kurale&family=Lato:wght@400;700&family=Poppins:wght@700&family=Raleway:wght@500&family=Roboto:wght@100;400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Kurale&family=Lato:wght@400;700&family=Poppins:wght@600;700&family=Raleway:wght@500&family=Roboto:wght@100;400;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -59,4 +59,13 @@ a {
   display:block;  
   width: 150px !important;
   height: 150px !important;
+}
+
+@keyframes background-pan {
+  from {
+    background-position: 0% center;
+  }
+  to {
+    background-position: -200% center;
+  }
 }
