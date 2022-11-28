@@ -1,4 +1,4 @@
-import ReactFlow, { Background, Controls, Edge, MarkerType, MiniMap, Node } from 'reactflow';
+import ReactFlow, { Background, Controls, Edge, MarkerType, MiniMap, Node, ReactFlowInstance } from 'reactflow';
 // import { SmartStepEdge } from '@tisoap/react-flow-smart-edge';
 import CourseNode from '../../components/CourseNode';
 import supabase from '../../utils/supabaseClient';
@@ -6,6 +6,8 @@ import 'reactflow/dist/style.css';
 import { useEffect, useMemo, useState } from 'react';
 import { Course_Course, Major_Course } from '../../types';
 import SideBar from '../../components/SideBar';
+import Top from '../../components/Top';
+import { DndContext, DragOverlay } from '@dnd-kit/core';
 
 const Degree = () => {
     const nodeTypes = useMemo(() => ({ courseNode: CourseNode }), []);
@@ -16,6 +18,8 @@ const Degree = () => {
     const [nodes, setNodes] = useState<Node[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
     const [show, setShow] = useState(false);
+    const [activeId, setActiveId] = useState<{ code: string, color: string} | null>(null);
+    const [flow, setFlow] = useState<ReactFlowInstance>();
 
     useEffect(() => {
         const fetchNodes = async () => {
@@ -154,6 +158,9 @@ const Degree = () => {
         }
         fetchNodes();
     }, []);
+    useEffect(() => {
+        if(flow) console.log(flow?.getZoom());
+    }, [flow]);
     const edgess: Edge[] = [
         {
             id: 'MTH 1303 -> MTH 2301',
@@ -192,36 +199,69 @@ const Degree = () => {
         }
     ]
     return (
-        <div className='h-screen w-screen flex flex-row justify-end bg-cyan-100'>
-            <SideBar show={show} setShow={setShow} />
-            <div className='z-10 h-full shadow-2xl' style={{width: show ? '75vw' : '98vw', transition: 'all 0.3s ease-in-out'}}>
-                <ReactFlow
-                    style={{background: '#cffafe'}}
-                    nodes={nodes}
-                    edges={edges}
-                    // snapToGrid={true}
-                    fitView={true}
-                    nodeTypes={nodeTypes}
-                    draggable={true}
-                    // edgeTypes={edgeTypes}
-                >
-                    {/* <Controls 
-                        className='ml-7'
-                        showInteractive={false}
-                        // showZoom={false}
-                        position='top-left'
-                    /> */}
-                    <Background 
-                        color="#000"
-                    />
-                    <MiniMap 
-                        nodeColor={(node) => node.data.background}
-                        zoomable
-                        pannable
-                    />
-                    <Controls />
-                </ReactFlow>
-            </div>
+        <div className='h-screen w-screen flex flex-col overflow-hidden'>
+            <DndContext
+                onDragStart={(e) => setActiveId(typeof(e.active.id) === 'string' ? {code: e.active.id, color: e.active.data.current!.background} : {code: e.active.id.toString(), color: e.active.data.current!.background})}
+                onDragEnd={(e) => setActiveId(null)}
+            >
+                <Top />
+                <div className='flex-grow w-full flex flex-row justify-end bg-cyan-100'>
+                    <SideBar show={show} setShow={setShow} />
+                    <div className='z-10 overflow-hidden h-full shadow-2xl' style={{width: show ? '75vw' : '98vw', transition: 'all 0.3s ease-in-out'}}>
+                        <DragOverlay>
+                            {
+                                activeId ? (
+                                    <div
+                                        className="px-4 z-50 py-2 border-2 border-black custom-drag-handle text-sm w-fit whitespace-nowrap"
+                                        style={{
+                                            // ...style,
+                                            ...{
+                                                boxShadow: "-3px 5px #000",
+                                                backgroundColor: activeId.color,
+                                                transition: "all 0.2s ease-in-out",
+                                                transform: `scale(${flow?.getZoom()})`,
+                                            },
+                                        }}
+                                    >
+                                        <div className="text-white font-JetBrainsMono bg-black px-1 rounded">
+                                            {activeId.code}
+                                        </div>
+                                    </div>
+                                ) : null
+                            }
+                        </DragOverlay>
+                        <ReactFlow
+                            style={{background: '#cffafe'}}
+                            nodes={nodes}
+                            edges={edges}
+                            // snapToGrid={true}
+                            fitView={true}
+                            nodeTypes={nodeTypes}
+                            draggable={false}
+                            onInit={(reactFlowInstance) => {
+                                setFlow(reactFlowInstance);
+                            }}
+                            // edgeTypes={edgeTypes}
+                        >
+                            {/* <Controls 
+                                className='ml-7'
+                                showInteractive={false}
+                                // showZoom={false}
+                                position='top-left'
+                            /> */}
+                            <Background 
+                                color="#000"
+                            />
+                            <MiniMap 
+                                nodeColor={(node) => node.data.background}
+                                zoomable
+                                pannable
+                            />
+                            <Controls />
+                        </ReactFlow>
+                    </div>
+                </div>
+            </DndContext>
         </div>
     )
 };

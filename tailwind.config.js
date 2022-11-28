@@ -12,9 +12,11 @@ module.exports = {
         Poppins: ["Poppins", "sans-serif"],
         Raleway: ["Raleway", "sans-serif"],
         Roboto: ["Roboto", "sans-serif"],
+        Merriweather: ["Merriweather", "sans-serif"],
+        // Lato: ["Lato"],
       },
       transitionProperty: {
-        
+
       }
     },
   },
