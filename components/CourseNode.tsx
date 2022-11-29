@@ -3,6 +3,7 @@ import React, { FC, memo } from "react";
 import { Handle, NodeProps, Position, WrapNodeProps } from "reactflow";
 import { CSS } from "@dnd-kit/utilities";
 import { CustomNode } from "../types";
+import { useCourses } from "../hooks/useCourses";
 
 const CourseNode: FC<NodeProps> = ({ data, dragHandle }) => {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
@@ -15,9 +16,12 @@ const CourseNode: FC<NodeProps> = ({ data, dragHandle }) => {
             opacity: 0.5,
           }
         : undefined;
+
+    const { used } = useCourses();
+    
     return (
         <div
-            ref={setNodeRef}
+            ref={!used.hasOwnProperty(data.code) ? setNodeRef : undefined}
             {...listeners}
             {...attributes}
             className="px-4 py-2 border-2 border-black"
@@ -28,6 +32,8 @@ const CourseNode: FC<NodeProps> = ({ data, dragHandle }) => {
                     backgroundColor: data.background,
                     zIndex: 9999999,
                     transition: "all 0.2s ease-in-out",
+                    opacity: used.hasOwnProperty(data.code) ? 0.5 : 1,
+                    cursor: used.hasOwnProperty(data.code) ? "not-allowed" : "grab",
                 },
             }}
         >

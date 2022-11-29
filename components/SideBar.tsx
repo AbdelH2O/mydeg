@@ -1,7 +1,12 @@
 import { useDroppable } from "@dnd-kit/core";
 import Image from "next/image";
 import React, { Dispatch, SetStateAction } from "react";
+import { useCourses } from "../hooks/useCourses";
 import styles from "../styles/sideBar.module.css";
+import { defaultTerms } from "../enums/terms";
+import Droppable from "./Droppable";
+import { addTerm } from "../utils/bridge";
+import { useRouter } from "next/router";
 
 const SideBar = (
     {
@@ -15,12 +20,23 @@ const SideBar = (
     
 ) => {
     const [hovering, setHovering] = React.useState(false);
-    const {isOver, setNodeRef} = useDroppable({
-        id: 'droppable',
-    });
-    const style = {
-        color: isOver ? 'green' : undefined,
-    };
+    const { terms, setTerms, map, setMap, colors} = useCourses();
+    const { id } = useRouter().query;
+
+    const handleAddTerm = async () => {
+        const term = Object.keys(defaultTerms)[Object.keys(terms).length];
+        const { id: termId, success } = await addTerm(id as string, term);
+        if(success) {
+            console.log({...terms, [termId as string]: term});
+            map.set(termId as string, []);
+            setMap(map);
+            setTerms({...terms, [termId as string]: term});
+            
+        } else {
+            // TODO: handle error
+        }
+    }
+
     return (
         <>
             <div 
@@ -40,60 +56,60 @@ const SideBar = (
                     {
                         show ?
                         <>
-                            {/* <div className="w-full h-16 bg-white flex flex-col justify-center items-center z-10">
-                                <div
-                                    className="w-32 h-20 my-5 flex justify-center rounded"
-                                    // style={{ boxShadow: '-3px 5px #000' }}
-                                >
-                                    <div className="flex flex-row justify-start items-center bg-white align-middle h-fit rounded">
-                                        <p
-                                            className="font-JetBrainsMono font-extrabold px-6 py-2 rounded text-2xl text-cyan-900"
-                                            // style={{
-                                            //     background: 'linear-gradient(to right, #b91c1c, #6d28d9, #ca8a04, #b91c1c)',
-                                            //     WebkitBackgroundClip: 'text',
-                                            //     WebkitTextFillColor: 'transparent',
-                                            //     whiteSpace: 'nowrap',
-                                            //     backgroundSize: '200%',
-                                            //     animation: 'background-pan 1.5s linear infinite',
-                                            // }}
-                                        >
-                                            BSCSC
-                                        </p>
-                                    </div>
-                                </div>
-                                {/* <div className="border-b -mt-2 mb-2 bg-white w-[80%] mx-auto border-neutral-200 rounded"></div> 
-                            </div> */}
-                            {/* <div className="border-b w-full mx-auto border-neutral-300 shadow-2xl"></div> */}
                             <div className="flex-auto w-full">
-                                <div className="min-h-[18vh] mx-4 rounded mt-4">
-                                        <div className="font-Poppins font-bold w-full h-10 flex flex-row rounded-t shadow-2xl justify-center items-center text-white bg-black">
-                                            Freshman S1
+                                {
+                                    Object.keys(terms).map((term, index) => {
+                                        
+                                        return (
+                                            <div className="min-h-[18vh] mx-4 rounded mt-4" key={term + index} style={{animation: 'resize 0.2s linear', '--scale': 0}}>
+                                                <div className="font-Poppins font-bold w-full h-10 flex flex-row rounded-t shadow-2xl justify-center items-center text-white bg-black">
+                                                    {terms[term]}
+                                                </div>
+                                            <div className="grid grid-cols-2 grid-rows-[75px_75px_75px] gap-2 m-2">
+                                                {
+                                                    map.get(term)!.map((course, index) => {                                              
+                                                        return (
+                                                            <div key={course + index} className="border border-dashed border-gray-300 rounded flex justify-center items-center bg-gray-100">
+                                                                <div
+                                                                    className="px-4 py-2 border-2 border-black rounded w-full my-auto h-full flex justify-center items-center"
+                                                                    style={{
+                                                                        // boxShadow: "-3px 5px #000",
+                                                                        backgroundColor: colors[course],
+                                                                        zIndex: 9999999,
+                                                                        transition: "all 0.2s ease-in-out",
+                                                                        textAlign: "center",
+                                                                        whiteSpace: "nowrap"
+                                                                    }}
+                                                                >
+                                                                    <div className="text-white text-lg font-JetBrainsMono bg-black p-2 rounded h-fit flex justify-center items-center">
+                                                                        {course}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                    })
+                                                }
+                                                {
+                                                    map.get(term)!.length < 6 ?
+                                                    [...Array(6 - map.get(term)!.length)].map((_, index) => {        
+                                                        return (
+                                                            // The key prop is set inside the Droppable component using the id prop
+                                                            // eslint-disable-next-line react/jsx-key
+                                                            <Droppable index={index} id={term + 'empty' + index}>
+                                                            </Droppable>
+                                                        );
+                                                    }) :
+                                                    null
+                                                }
+                                            </div>
                                         </div>
-                                    <div className="grid grid-cols-2 grid-rows-[75px_75px_75px] gap-2 m-2">
-                                        <div style={style} ref={setNodeRef} className="border border-dashed border-gray-300 rounded flex justify-center items-center bg-gray-100 cursor-pointer">
-
-                                        </div>
-                                        <div className="border border-dashed border-gray-300 rounded flex justify-center items-center bg-gray-100 cursor-pointer">
-                                        </div>
-                                        <div className="border border-dashed border-gray-300 rounded flex justify-center items-center bg-gray-100 cursor-pointer">
-
-                                        </div>
-                                        <div className="border border-dashed border-gray-300 rounded flex justify-center items-center bg-gray-100 cursor-pointer">
-                                        </div>
-                                        <div className="border border-dashed border-gray-300 rounded flex justify-center items-center bg-gray-100 cursor-pointer">
-
-                                        </div>
-                                        <div className="border border-dashed border-gray-300 rounded flex justify-center items-center bg-gray-100 cursor-pointer">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="border-b w-[90%] mt-4 mx-auto border-neutral-200 shadow-2xl rounded"></div>
-                                {/* <div className="min-h-[18vh] mx-4 rounded mt-4">
-                                        <div className="font-Poppins font-bold w-full h-10 flex flex-row rounded-t shadow-2xl justify-center items-center text-white bg-black">
-                                            Freshman S2
-                                        </div>
-                                    <div className="grid grid-cols-2 grid-rows-[75px_minmax(100px,_1fr)_100px] gap-2 m-2">
-                                        <div className="h-30 border border-dashed border-cyan-300 rounded flex justify-center items-center bg-cyan-100 cursor-pointer">
+                                        )
+                                    })
+                                }
+                                {
+                                    Object.keys(terms).length < 8 ?
+                                    <div className="w-full h-16 px-4 mb-2">
+                                        <div onClick={handleAddTerm} className="w-full bg-cyan-100 border-cyan-300 border-dashed border h-full my-4 rounded flex justify-center items-center cursor-pointer">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height={40} width={40} fill={'#0891b2'}>
                                                 <g data-name="Layer 2">
                                                     <g data-name="plus-circle">
@@ -103,40 +119,9 @@ const SideBar = (
                                                 </g>
                                             </svg>
                                         </div>
-                                    </div>
-                                </div>
-                                <div className="border-b w-[90%] mt-4 mx-auto border-neutral-200 shadow-2xl"></div>
-                                <div className="min-h-[18vh] mx-4 rounded mt-4">
-                                    <div className="font-Poppins font-bold w-full h-10 flex flex-row rounded-t shadow-2xl justify-center items-center text-white bg-black">
-                                        Sophomore S1
-                                    </div>
-                                    <div className="grid grid-cols-2 grid-rows-[75px_minmax(100px,_1fr)_100px] gap-2 m-2">
-                                        <div className="h-30 border border-dashed border-cyan-300 rounded flex justify-center items-center bg-cyan-100 cursor-pointer">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height={40} width={40} fill={'#0891b2'}>
-                                                <g data-name="Layer 2">
-                                                    <g data-name="plus-circle">
-                                                        <rect width="24" height="24" opacity="0"/>
-                                                        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm3 11h-2v2a1 1 0 0 1-2 0v-2H9a1 1 0 0 1 0-2h2V9a1 1 0 0 1 2 0v2h2a1 1 0 0 1 0 2z"/>
-                                                    </g>
-                                                </g>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="border-b w-[90%] mt-4 mx-auto border-neutral-200 shadow-2xl"></div> */}
-                                
-                                <div className="w-full h-16 px-4 mb-2">
-                                    <div className="w-full bg-cyan-100 border-cyan-300 border-dashed border h-full my-4 rounded flex justify-center items-center cursor-pointer">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height={40} width={40} fill={'#0891b2'}>
-                                            <g data-name="Layer 2">
-                                                <g data-name="plus-circle">
-                                                    <rect width="24" height="24" opacity="0"/>
-                                                    <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm3 11h-2v2a1 1 0 0 1-2 0v-2H9a1 1 0 0 1 0-2h2V9a1 1 0 0 1 2 0v2h2a1 1 0 0 1 0 2z"/>
-                                                </g>
-                                            </g>
-                                        </svg>
-                                    </div>
-                                </div>
+                                    </div> :
+                                    null
+                                }
                             </div>
                         </> :
                         <></>
@@ -157,7 +142,7 @@ const SideBar = (
                 onMouseEnter={() => setHovering(true)}
                 onMouseLeave={() => setHovering(false)}
             >
-                <svg style={{transform: show ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'all 0.3s ease-in-out'}} xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 64 64" viewBox="0 0 64 64">
+                <svg style={{transform: show ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'all 0.3s ease-in-out'}} xmlns="http://www.w3.org/2000/svg" enableBackground="new 0 0 64 64" viewBox="0 0 64 64">
                     <path
                         className={"cursor-pointer "}
                         // style={{fill: hovering ? '#ffffff' : '#000000', transition: 'all 0.3s ease-in-out, fill 0.2s ease-in-out'}}

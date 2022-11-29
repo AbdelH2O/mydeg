@@ -11,6 +11,9 @@ body {
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
   overflow: hidden;
 }
+:root {
+  --scale: 1;
+}
 
 .text-shadow {
   /* text-shadow:
@@ -72,4 +75,13 @@ a {
 }
 .react-flow__controls-interactive {
   display: none!important;
+}
+
+@keyframes resize{
+  0% {
+    transform: scale(var(--scale));
+  }
+  100%{
+    transform:scale(1);
+  }
 }
