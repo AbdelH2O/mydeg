@@ -9,4 +9,9 @@ export const defaultTerms = {
     "Senior S2": 8,
 };
 
-export type Keys = keyof typeof defaultTerms;
+// export type Keys = keyof typeof defaultTerms;
+
+export type Keys = "Freshman S1" | "Freshman S2" | "Sophomore S1" | "Sophomore S2" | "Junior S1" | "Junior S2" | "Senior S1" | "Senior S2";
+export type StatusFromUnion = {
+    [key in Keys]: string;
+};

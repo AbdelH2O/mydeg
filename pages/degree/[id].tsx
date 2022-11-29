@@ -17,7 +17,7 @@ const Degree = () => {
     const [show, setShow] = useState(false);
     const [flow, setFlow] = useState<ReactFlowInstance>();
 
-    const { nodes, edges, map, setMap, activeId, setActiveId, colors, used, setUsed } = useCourses();
+    const { nodes, edges, map, setMap, activeId, setActiveId, terms, colors, used, setUsed } = useCourses();
 
     const handleDragEnd = (event: DragEndEvent) => {
         const {over, active} = event;
@@ -32,7 +32,7 @@ const Degree = () => {
                     ]
                 );
                 addCourse((over.id as string).slice(0, 36), active.id as string);
-                setUsed({...used, [active.id as string]: true});
+                setUsed({...used, [active.id as string]: Object.keys(terms).indexOf((over.id as string).slice(37))});
                 setMap(new Map(map));
             }
         }

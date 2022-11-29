@@ -4,7 +4,7 @@ import { Edge, MarkerType, Node } from "reactflow";
 import { CoursesContext } from "../hooks/useCourses";
 import { Course_Course, Major_Course } from "../types";
 import supabase from "../utils/supabaseClient";
-import { defaultTerms, Keys } from "../enums/terms";
+import { defaultTerms } from "../enums/terms";
 
 export const CoursesProvider = ({
     children,
@@ -84,7 +84,7 @@ const getDegree = async (
         // TODO: Handle error
         return { major: "", minor: "" };
     } else {
-        const terms: {[key: Keys]: string} = {};
+        const terms: {[key: string]: string} = {};
         setMajorMinor({ major: data[0].major, minor: data[0].minor });
         const used: {[key: string]: number} = {};
         console.log(data);
@@ -103,12 +103,14 @@ const getDegree = async (
             terms[term.id] = term.name;
             const courses = term.Degree_Term_Course.map((course: {term: string, course: string}) => {
                 // const courses = (coursesMap.get(course.term) || []).concat(course.course);
+                // @ts-ignore
                 used[course.course] = defaultTerms[term.id];
                 return course.course;
             });
             coursesMap.set(term.id, Array.from(new Set(courses)));
         });
         setUsed(used);
+        // @ts-ignore 
         setTerms(Object.keys(terms).sort(function(a,b){return defaultTerms[terms[a]] - defaultTerms[terms[b]]}).reduce((r: {[key: string]: string},k)=>(r[k]=terms[k],r),{}));
         console.log(terms);
         

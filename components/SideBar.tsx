@@ -61,7 +61,7 @@ const SideBar = (
                                     Object.keys(terms).map((term, index) => {
                                         
                                         return (
-                                            <div className="min-h-[18vh] mx-4 rounded mt-4" key={term + index} style={{animation: 'resize 0.2s linear', '--scale': 0}}>
+                                            <div className="min-h-[18vh] mx-4 rounded mt-4" key={term + index} style={{animation: 'resize 0.2s linear', '--scale': 0} as React.CSSProperties}>
                                                 <div className="font-Poppins font-bold w-full h-10 flex flex-row rounded-t shadow-2xl justify-center items-center text-white bg-black">
                                                     {terms[term]}
                                                 </div>
