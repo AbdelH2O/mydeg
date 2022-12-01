@@ -30,23 +30,20 @@ const CourseNode: FC<NodeProps> = ({ data, dragHandle }) => {
             style={{
                 ...style,
                 ...{
-                    boxShadow: `-3px 5px ${unlocked ? "#16a34a" : data.background}`,
+                    boxShadow: `-3px 5px ${unlocked ? "#000" : data.background}`,
                     backgroundColor: unlocked ? data.background : "#000",
                     zIndex: 9999999,
                     transition: "all 0.2s ease-in-out",
                     opacity: used.hasOwnProperty(data.code) ? 0.5 : 1,
                     cursor: used.hasOwnProperty(data.code) || !unlocked ? "not-allowed" : "grab",
                     // filter: !unlocked ? "grayscale(100%)" : "none",
-                    borderColor: unlocked ? data.background : '',
+                    borderColor: unlocked ? data.background : "#000",
+                    borderRadius: "0.25rem",
                 },
             }}
         >
             <div 
                 className="text-white font-JetBrainsMono bg-black px-1 rounded" 
-                // style={{
-                //     width: !unlocked ? "fit-content" : "100%",
-                //     height: !unlocked ? "fit-content" : "100%"
-                // }}
             >
                 {data.code}
             </div>
