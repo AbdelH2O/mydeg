@@ -17,6 +17,8 @@ const DEFAULT_CONTEXT: {
     setActiveId: (id: string) => void;
     used: {[key: string]: number};
     setUsed: (used: {[key: string]: number}) => void;
+    req: {[key: string]: string[]};
+    setReq: (req: {[key: string]: string[]}) => void;
 } = {
     map: new Map(),
     setMap: () => {},
@@ -32,6 +34,8 @@ const DEFAULT_CONTEXT: {
     setActiveId: () => {},
     used: {},
     setUsed: () => {},
+    req: {},
+    setReq: () => {},
 };
   
 export const CoursesContext = createContext(DEFAULT_CONTEXT);

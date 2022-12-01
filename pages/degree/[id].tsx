@@ -1,5 +1,5 @@
 import ReactFlow, { Background, Controls, Edge, MarkerType, MiniMap, Node, ReactFlowInstance } from 'reactflow';
-// import { SmartStepEdge } from '@tisoap/react-flow-smart-edge';
+import { SmartStepEdge } from '@tisoap/react-flow-smart-edge';
 import CourseNode from '../../components/CourseNode';
 import 'reactflow/dist/style.css';
 import { useEffect, useMemo, useState } from 'react';
@@ -9,11 +9,12 @@ import { DndContext, DragEndEvent, DragOverlay } from '@dnd-kit/core';
 import { useCourses } from '../../hooks/useCourses';
 import { addCourse } from '../../utils/bridge';
 
+const edgeTypes = {
+    smart: SmartStepEdge
+};
+
 const Degree = () => {
     const nodeTypes = useMemo(() => ({ courseNode: CourseNode }), []);
-    // const edgeTypes = {
-    //     smart: SmartStepEdge
-    // };
     const [show, setShow] = useState(false);
     const [flow, setFlow] = useState<ReactFlowInstance>();
 
@@ -90,7 +91,7 @@ const Degree = () => {
                             onInit={(reactFlowInstance) => {
                                 setFlow(reactFlowInstance);
                             }}
-                            // edgeTypes={edgeTypes}
+                            edgeTypes={edgeTypes}
                         >
                             <Background 
                                 color="#000"

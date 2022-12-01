@@ -1,11 +1,11 @@
 import { useDroppable } from "@dnd-kit/core";
 import Image from "next/image";
-import React, { Dispatch, SetStateAction } from "react";
+import React, { Dispatch, Fragment, MouseEventHandler, SetStateAction } from "react";
 import { useCourses } from "../hooks/useCourses";
 import styles from "../styles/sideBar.module.css";
 import { defaultTerms } from "../enums/terms";
 import Droppable from "./Droppable";
-import { addTerm } from "../utils/bridge";
+import { addTerm, removeCourse } from "../utils/bridge";
 import { useRouter } from "next/router";
 
 const SideBar = (
@@ -20,7 +20,7 @@ const SideBar = (
     
 ) => {
     const [hovering, setHovering] = React.useState(false);
-    const { terms, setTerms, map, setMap, colors} = useCourses();
+    const { terms, setTerms, map, setMap, colors, used, setUsed, activeId } = useCourses();
     const { id } = useRouter().query;
 
     const handleAddTerm = async () => {
@@ -37,6 +37,15 @@ const SideBar = (
         }
     }
 
+    const handleDeleteCourse: MouseEventHandler<HTMLDivElement> = async (e) => {
+        e.preventDefault();
+        delete used[(e.target as HTMLElement).innerText];
+        setUsed(used);
+        removeCourse((e.target as HTMLElement).dataset.term!, (e.target as HTMLElement).innerText);
+        map.set((e.target as HTMLElement).dataset.term!, map.get((e.target as HTMLElement).dataset.term!)!.filter(c => c !== (e.target as HTMLElement).innerText));
+        setMap(map);
+        setTerms({...terms});
+    }
     return (
         <>
             <div 
@@ -65,23 +74,31 @@ const SideBar = (
                                                 <div className="font-Poppins font-bold w-full h-10 flex flex-row rounded-t shadow-2xl justify-center items-center text-white bg-black">
                                                     {terms[term]}
                                                 </div>
-                                            <div className="grid grid-cols-2 grid-rows-[75px_75px_75px] gap-2 m-2">
+                                            <div
+                                                className="grid grid-cols-2 grid-rows-[75px_75px_75px] gap-2 m-2 p-2 rounded"
+                                                style={{
+                                                    // backgroundColor: !activeId ? 'transparent' : '#dcfce7',
+                                                    animation: !activeId ? '' : 'bgColor 1s linear infinite',
+                                                }}
+                                            >
                                                 {
                                                     map.get(term)!.map((course, index) => {                                              
                                                         return (
                                                             <div key={course + index} className="border border-dashed border-gray-300 rounded flex justify-center items-center bg-gray-100">
                                                                 <div
-                                                                    className="px-4 py-2 border-2 border-black rounded w-full my-auto h-full flex justify-center items-center"
+                                                                    className="px-4 py-2 relative border-2 border-black w-full my-auto h-full flex justify-center items-center"
                                                                     style={{
-                                                                        // boxShadow: "-3px 5px #000",
+                                                                        boxShadow: "-3px 5px #000",
                                                                         backgroundColor: colors[course],
                                                                         zIndex: 9999999,
                                                                         transition: "all 0.2s ease-in-out",
                                                                         textAlign: "center",
                                                                         whiteSpace: "nowrap"
                                                                     }}
+                                                                    data-term={term}
+                                                                    onContextMenu={handleDeleteCourse}
                                                                 >
-                                                                    <div className="text-white text-lg font-JetBrainsMono bg-black p-2 rounded h-fit flex justify-center items-center">
+                                                                    <div data-term={term} className="text-white text-lg font-JetBrainsMono bg-black p-2 rounded h-fit flex justify-center items-center">
                                                                         {course}
                                                                     </div>
                                                                 </div>
@@ -91,12 +108,18 @@ const SideBar = (
                                                 }
                                                 {
                                                     map.get(term)!.length < 6 ?
-                                                    [...Array(6 - map.get(term)!.length)].map((_, index) => {        
+                                                    [...Array(6 - map.get(term)!.length)].map((_, index) => {            
                                                         return (
-                                                            // The key prop is set inside the Droppable component using the id prop
-                                                            // eslint-disable-next-line react/jsx-key
-                                                            <Droppable index={index} id={term + 'empty' + index}>
-                                                            </Droppable>
+                                                            <Fragment key={term+'empty'+index}>
+                                                                <Droppable
+                                                                    index={index}
+                                                                    id={term + 'empty' + index}
+                                                                    className="border border-dashed border-gray-300 rounded flex justify-center items-center bg-gray-100"
+                                                                    // style={{
+                                                                    //     backgroundColor: !activeId ? '#f3f4f6' : 'transparent',
+                                                                    // }}
+                                                                />
+                                                            </Fragment>
                                                         );
                                                     }) :
                                                     null

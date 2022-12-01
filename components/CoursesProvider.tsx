@@ -26,6 +26,7 @@ export const CoursesProvider = ({
     const [colors, setColors] = useState<{[key: string]: string}>({});
     const [activeId, setActiveId] = useState<string>("");
     const [used, setUsed] = useState<{[key: string]: number}>({});
+    const [req, setReq] = useState<{[key: string]: string[]}>({});
 
     useEffect(() => {
         if(id) {
@@ -33,7 +34,7 @@ export const CoursesProvider = ({
             (async () => {
                 setLoading(true);
                 const mm = await getDegree(id as string, setMajorMinor, coursesMap, setTerms, setUsed);
-                mm.major && (await getCourses(mm.major, setNodes, setEdges, setColors));
+                mm.major && (await getCourses(mm.major, setNodes, setEdges, setColors, setReq));
                 setLoading(false);
             })();
         }
@@ -54,6 +55,8 @@ export const CoursesProvider = ({
                 setActiveId,
                 used,
                 setUsed,
+                req,
+                setReq
             }}
         >
             {children}
@@ -104,12 +107,13 @@ const getDegree = async (
             const courses = term.Degree_Term_Course.map((course: {term: string, course: string}) => {
                 // const courses = (coursesMap.get(course.term) || []).concat(course.course);
                 // @ts-ignore
-                used[course.course] = defaultTerms[term.id];
+
+                used[course.course] = defaultTerms[term.name];
                 return course.course;
             });
             coursesMap.set(term.id, Array.from(new Set(courses)));
         });
-        setUsed(used);
+        setUsed(used);        
         // @ts-ignore 
         setTerms(Object.keys(terms).sort(function(a,b){return defaultTerms[terms[a]] - defaultTerms[terms[b]]}).reduce((r: {[key: string]: string},k)=>(r[k]=terms[k],r),{}));
         console.log(terms);
@@ -124,6 +128,7 @@ const getCourses = async (
     setNodes: React.Dispatch<React.SetStateAction<Node[]>>,
     setEdges: React.Dispatch<React.SetStateAction<Edge[]>>,
     setColors: React.Dispatch<React.SetStateAction<{[key: string]: string}>>,
+    setReq: React.Dispatch<React.SetStateAction<{[key: string]: string[]}>>,
 ) => {
     const { data, error } = await supabase
         .from("Majors")
@@ -198,6 +203,7 @@ const getCourses = async (
                 (majorCourse: Major_Course) => majorCourse.course
             )
         );
+    const req: {[key: string]: string[]} = {};
     const edges_temp: Edge[] = data2!
         .filter(
             (requisite: Course_Course) =>
@@ -207,6 +213,12 @@ const getCourses = async (
                 coord.has(requisite.requisite)
         )
         .map((requisite: Course_Course) => {
+            if (requisite.type == "pre") {
+                if (req[requisite.course] == undefined) {
+                    req[requisite.course] = [];
+                }
+                req[requisite.course].push(requisite.requisite);
+            }
             return {
                 id: `${requisite.course} -> ${requisite.requisite}`,
                 source: requisite.requisite,
@@ -251,6 +263,7 @@ const getCourses = async (
                 },
             };
         });
+    setReq(req);
     setEdges(edges_temp);
     groups.clear();
     coord.clear();

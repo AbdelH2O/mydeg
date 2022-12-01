@@ -85,3 +85,15 @@ a {
     transform:scale(1);
   }
 }
+
+@keyframes bgColor {
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: #bbf7d0;
+  }
+  100% {
+    background-color: transparent;
+  }
+}
