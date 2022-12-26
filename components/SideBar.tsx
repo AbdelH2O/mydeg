@@ -1,6 +1,6 @@
 import { useDroppable } from "@dnd-kit/core";
 import Image from "next/image";
-import React, { Dispatch, Fragment, MouseEventHandler, SetStateAction } from "react";
+import React, { Dispatch, Fragment, MouseEventHandler, MutableRefObject, SetStateAction } from "react";
 import { useCourses } from "../hooks/useCourses";
 import styles from "../styles/sideBar.module.css";
 import { defaultTerms } from "../enums/terms";
@@ -11,23 +11,24 @@ import { useRouter } from "next/router";
 const SideBar = (
     {
         show,
-        setShow
+        setShow,
+        onSideBarRefChange
     } : 
     {
         show: boolean,
-        setShow: Dispatch<SetStateAction<boolean>>
+        setShow: Dispatch<SetStateAction<boolean>>,
+        onSideBarRefChange: (node: HTMLDivElement) => void
     }
     
 ) => {
     const [hovering, setHovering] = React.useState(false);
-    const { terms, setTerms, map, setMap, colors, used, setUsed, activeId } = useCourses();
+    const { terms, setTerms, map, setMap, colors, used, setUsed, activeId, req } = useCourses();
     const { id } = useRouter().query;
 
     const handleAddTerm = async () => {
         const term = Object.keys(defaultTerms)[Object.keys(terms).length];
         const { id: termId, success } = await addTerm(id as string, term);
         if(success) {
-            console.log({...terms, [termId as string]: term});
             map.set(termId as string, []);
             setMap(map);
             setTerms({...terms, [termId as string]: term});
@@ -46,6 +47,18 @@ const SideBar = (
         setMap(map);
         setTerms({...terms});
     }
+
+    // Checks whether or not we can add the actively dragged element to the term at the specified index
+    const addable = (index: number) => {
+        return (
+            !req[activeId] ||
+            req[activeId]
+                .every(
+                    (requirement) => used[requirement] !== undefined && (used[requirement] < index)
+                )
+        );
+    }
+
     return (
         <>
             <div 
@@ -61,24 +74,29 @@ const SideBar = (
                 onMouseEnter={() => {if(!show) setHovering(true)}}
                 onMouseLeave={() => {if(!show || hovering) setHovering(false)}}
             >
-                <div className="w-full h-full flex flex-col justify-start items-center pb-2 overflow-y-scroll">
+                <div className="w-full h-full flex flex-col justify-start items-center pb-2 overflow-y-scroll" ref={onSideBarRefChange}>
                     {
                         show ?
                         <>
                             <div className="flex-auto w-full">
                                 {
-                                    Object.keys(terms).map((term, index) => {
-                                        
+                                    Object.keys(terms).map((term, index) => {                                        
                                         return (
-                                            <div className="min-h-[18vh] mx-4 rounded mt-4" key={term + index} style={{animation: 'resize 0.2s linear', '--scale': 0} as React.CSSProperties}>
-                                                <div className="font-Poppins font-bold w-full h-10 flex flex-row rounded-t shadow-2xl justify-center items-center text-white bg-black">
+                                            <div className="min-h-[35vh] mx-4 rounded mt-4" key={term + index} style={{animation: 'resize 0.2s linear', '--scale': 0} as React.CSSProperties}>
+                                                <div
+                                                    className="font-Poppins font-bold w-full h-10 flex flex-row rounded-t shadow-2xl justify-center items-center text-white bg-black"
+                                                    style={{
+                                                        backgroundColor: !activeId || !addable(index) ? 'black' : '#0891b2',
+                                                        transition: 'background-color 0.3s ease'
+                                                    }}
+                                                >
                                                     {terms[term]}
                                                 </div>
                                             <div
                                                 className="grid grid-cols-2 grid-rows-[75px_75px_75px] gap-2 m-2 p-2 rounded"
                                                 style={{
                                                     // backgroundColor: !activeId ? 'transparent' : '#dcfce7',
-                                                    animation: !activeId ? '' : 'bgColor 1s linear infinite',
+                                                    animation: !activeId || !addable(index) ? '' : 'bgColor 1s linear infinite',
                                                 }}
                                             >
                                                 {
@@ -86,14 +104,15 @@ const SideBar = (
                                                         return (
                                                             <div key={course + index} className="border border-dashed border-gray-300 rounded flex justify-center items-center bg-gray-100">
                                                                 <div
-                                                                    className="px-4 py-2 relative border-2 border-black w-full my-auto h-full flex justify-center items-center"
+                                                                    className="px-4 py-2 relative border-2 rounded w-full my-auto h-full flex justify-center items-center"
                                                                     style={{
                                                                         boxShadow: "-3px 5px #000",
                                                                         backgroundColor: colors[course],
                                                                         zIndex: 9999999,
                                                                         transition: "all 0.2s ease-in-out",
                                                                         textAlign: "center",
-                                                                        whiteSpace: "nowrap"
+                                                                        whiteSpace: "nowrap",
+                                                                        borderColor: "#000",
                                                                     }}
                                                                     data-term={term}
                                                                     onContextMenu={handleDeleteCourse}
@@ -122,7 +141,18 @@ const SideBar = (
                                                             </Fragment>
                                                         );
                                                     }) :
-                                                    null
+                                                    ( map.get(term)!.length === 6 && 
+                                                        <Fragment key={term+'empty7'}>
+                                                            <Droppable
+                                                                index={7}
+                                                                id={term + 'empty7'}
+                                                                className="border border-dashed w-[144px] mx-auto col-span-2 h-[75px] border-gray-300 rounded flex justify-center items-center bg-gray-100"
+                                                                // style={{
+                                                                //     backgroundColor: !activeId ? '#f3f4f6' : 'transparent',
+                                                                // }}
+                                                            />
+                                                        </Fragment>
+                                                    )
                                                 }
                                             </div>
                                         </div>

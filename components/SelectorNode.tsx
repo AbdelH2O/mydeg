@@ -5,7 +5,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { CustomNode } from "../types";
 import { useCourses } from "../hooks/useCourses";
 
-const CourseNode: FC<NodeProps> = ({ data, dragHandle }) => {
+const SelectorNode: FC<NodeProps> = ({ data, dragHandle }) => {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
         id: data.code,
         data: data,
@@ -31,7 +31,8 @@ const CourseNode: FC<NodeProps> = ({ data, dragHandle }) => {
                 ...style,
                 ...{
                     boxShadow: `-3px 5px ${unlocked ? "#000" : "#000"}`,
-                    backgroundColor: unlocked ? data.background : "#404040",
+                    background: unlocked ? "linear-gradient(to right, rgb(185, 28, 28), rgb(109, 40, 217), rgb(202, 138, 4), rgb(185, 28, 28)) 0% 0% / 200%" : "#404040",
+                    animation: "1.5s linear 0s infinite normal none running background-pan",
                     zIndex: 9999999,
                     transition: "all 0.2s ease-in-out",
                     opacity: used.hasOwnProperty(data.code) ? 0.5 : 1,
@@ -152,4 +153,4 @@ const CourseNode: FC<NodeProps> = ({ data, dragHandle }) => {
     );
 };
 
-export default memo(CourseNode);
+export default memo(SelectorNode);

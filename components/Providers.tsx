@@ -1,4 +1,4 @@
-import { CoursesProvider } from "./CoursesProvider";
+import { CoursesProvider } from "./providers/CoursesProvider";
 
 const Providers = ({ children }: { children: JSX.Element|JSX.Element[]}) => {
     return (
