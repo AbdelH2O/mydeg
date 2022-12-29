@@ -5,6 +5,7 @@ import { CoursesContext } from "../../hooks/useCourses";
 import supabase from "../../utils/supabaseClient";
 import { defaultTerms } from "../../enums/terms";
 import { abreviations } from "../../enums/abr";
+import NProgress from "nprogress";
 
 export const CoursesProvider = ({
     children,
@@ -32,11 +33,18 @@ export const CoursesProvider = ({
         if(id) {
             (async () => {
                 setLoading(true);
+                NProgress.set(0.3);
+                NProgress.start();
                 const mm = await getDegree(id as string, setMajorMinor, coursesMap, setTerms, setUsed);
                 mm.major && (await getCourses(mm.major, setNodes, setEdges, setColors, setReq));
+                mm.minor && (NProgress.done());
                 setLoading(false);
             })();
         }
+        supabase.auth.setSession({
+            access_token: 'ey',
+            refresh_token: 'ey',
+        })
     }, [id]);
     return (
         <CoursesContext.Provider

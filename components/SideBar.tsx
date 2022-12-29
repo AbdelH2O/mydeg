@@ -22,6 +22,7 @@ const SideBar = (
     
 ) => {
     const [hovering, setHovering] = React.useState(false);
+    const [display, setDisplay] = React.useState(false);
     const { terms, setTerms, map, setMap, colors, used, setUsed, activeId, req } = useCourses();
     const { id } = useRouter().query;
 
@@ -59,25 +60,40 @@ const SideBar = (
         );
     }
 
+    const handleClose = () => {
+        if(show) {
+            setShow(!show);
+            setHovering(false);
+            setTimeout(() => {
+                setDisplay(!display);
+            }, 300);
+        } else {
+            setDisplay(!display);
+            setShow(!show);
+            setHovering(false);
+        }
+    }
+
     return (
         <>
             <div 
                 className="h-full border border-sky-300/50 absolute z-20 resize-x"
-                style={{left: show ? '25vw' : '2vw', transition: 'all 0.3s ease-in-out', cursor: show ? 'ew-resize' : 'auto'}}
+                style={{left: show ? '25vw' : '1.5vw', transition: 'all 0.3s ease-in-out', cursor: show ? 'ew-resize' : 'auto'}}
                 onMouseEnter={() => {if(!show) setHovering(true)}}
                 onMouseLeave={() => {if(!show || hovering) setHovering(false)}}
             ></div>
             <div
-                className={`bg-white h-[calc(100%-3.5rem)] fixed left-0`}
-                style={{width: show ? '25vw' : '2vw', cursor: !show ? 'pointer' : 'default', backdropFilter: hovering ? 'blur(4px)' : 'none', transition: 'all 0.3s ease-in-out'}}
-                onClick={() => {if(!show) {setShow(!show);setHovering(false)}}}
+                className={`bg-white h-[calc(100%-3.5rem)] left-0 fixed`}
+                style={{width: '25vw', marginLeft: show ? '0' : '-23.5vw', cursor: !show ? 'pointer' : 'default', backdropFilter: hovering ? 'blur(4px)' : 'none', transition: 'all 0.3s ease-in-out'}}
+                onClick={() => {if(!show) {handleClose}}}
                 onMouseEnter={() => {if(!show) setHovering(true)}}
                 onMouseLeave={() => {if(!show || hovering) setHovering(false)}}
             >
+                <div className="absolute w-full h-full bg-white z-50" style={{display: !display ? 'block' : 'none'}} onClick={handleClose}></div>
                 <div className="w-full h-full flex flex-col justify-start items-center pb-2 overflow-y-scroll" ref={onSideBarRefChange}>
-                    {
+                    {/* {
                         show ?
-                        <>
+                        <> */}
                             <div className="flex-auto w-full">
                                 {
                                     Object.keys(terms).map((term, index) => {                                        
@@ -176,26 +192,26 @@ const SideBar = (
                                     null
                                 }
                             </div>
-                        </> :
+                        {/* </> :
                         <></>
-                    }
+                    } */}
                 </div>
             </div>
             {/* <div className="h-full border border-neutral-300 absolute left-[2vw] z-50 cursor-ew-resize hover:brightness-105 hover:"></div> */}
             <div
                 className={`z-[999999] top-1/2 absolute -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full shadow-xl bg-white cursor-pointer `}
                 style={{
-                    left: show ? '25vw' : '2vw',
-                    transition: 'all 0.3s ease-in-out, background-color 0s',
-                    // backgroundColor: !hovering ? 'white' : '#5eead4',
-                    filter: !hovering ? 'brightness(100%)' : 'brightness(110%)',
+                    left: show ? '25vw' : '1.5vw',
+                    transition: 'all 0.3s ease-in-out, background-color 0.1s ease-in-out, fill 0.1s ease-in-out',
+                    backgroundColor: !hovering ? 'white' : '#0e7490',
+                    // filter: !hovering ? 'brightness(100%)' : 'brightness(110%)',
                     // boxShadow: '-3px 5px #000',
                 }}
-                onClick={() => setShow(!show)}
+                onClick={handleClose}
                 onMouseEnter={() => setHovering(true)}
                 onMouseLeave={() => setHovering(false)}
             >
-                <svg style={{transform: show ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'all 0.3s ease-in-out'}} xmlns="http://www.w3.org/2000/svg" enableBackground="new 0 0 64 64" viewBox="0 0 64 64">
+                <svg fill={!hovering ? 'black' : 'white'} onMouseEnter={() => setHovering(true)} onMouseLeave={() => setHovering(false)} style={{transform: show ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'all 0.1s ease-in-out'}} xmlns="http://www.w3.org/2000/svg" enableBackground="new 0 0 64 64" viewBox="0 0 64 64">
                     <path
                         className={"cursor-pointer "}
                         // style={{fill: hovering ? '#ffffff' : '#000000', transition: 'all 0.3s ease-in-out, fill 0.2s ease-in-out'}}

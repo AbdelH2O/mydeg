@@ -1,6 +1,7 @@
-import { PublicClientApplication } from "@azure/msal-browser";
+import { Configuration, PublicClientApplication } from "@azure/msal-browser";
+import { toast } from "react-toastify";
 
-const msalConfig = {
+const msalConfig: Configuration = {
     auth: {
         clientId: process.env.NEXT_PUBLIC_MSAL_CLIENT_ID || "",
         redirectUri: `${
@@ -9,13 +10,11 @@ const msalConfig = {
         authority: process.env.NEXT_PUBLIC_MSAL_AUTHORITY || "",
     },
     cache: {
-        cacheLocation: "sessionStorage",
-        storeAuthStateInCookie: false,
+        cacheLocation: "localStorage",
+        storeAuthStateInCookie: true,
+        secureCookies: true,
     },
 };
-
-console.log(msalConfig);
-
 
 const msalApp = new PublicClientApplication(msalConfig);
 
@@ -29,7 +28,7 @@ export const msalLogin = async () => {
         });
         return response;
     } catch (err) {
-        // eslint-disable-next-line no-console
         console.dir(err); // HACK proper error handling
+        toast.error("Login failed");
     }
 };

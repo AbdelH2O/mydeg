@@ -80,7 +80,7 @@ const Degree = () => {
                 <Top />
                 <div className='flex-grow w-full flex flex-row justify-end bg-cyan-100'>
                     <SideBar onSideBarRefChange={onRefChange} show={show} setShow={setShow} />
-                    <div className='z-10 overflow-hidden h-full shadow-2xl' style={{width: show ? '75vw' : '98vw', transition: 'all 0.3s ease-in-out'}}>
+                    <div className='z-10 overflow-hidden h-full shadow-2xl' style={{width: show ? '75vw' : '98.5vw', transition: 'all 0.3s ease-in-out'}}>
                         <DragOverlay
                             zIndex={100}
                             style={{
