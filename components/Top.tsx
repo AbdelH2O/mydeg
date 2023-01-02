@@ -4,7 +4,7 @@ import { useCourses } from "../hooks/useCourses";
 const Top = () => {
     const { minor, major } = useCourses();
     return (
-        <div className="text-white text-2xl h-16 bg-cyan-700 brightness-110 w-full border-b-2 border-sky-300/20 shadow-lg z-20 grid grid-cols-3 grid-rows-1">
+        <div className="text-white text-2xl absolute top-0 h-16 bg-cyan-700 brightness-110 w-full border-b-2 border-sky-300/20 shadow-lg z-20 grid grid-cols-3 grid-rows-1">
             <div className="px-4 py-2 rounded ml-2 flex justify-start items-center">
                 <div className="select-none cursor-pointer">
                     <span className="pr-[0.125rem] font- text-2xl font-Raleway">my</span>

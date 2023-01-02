@@ -1,13 +1,16 @@
-import { Fragment } from "react";
-import { Disclosure, Menu, Transition } from "@headlessui/react";
+import { Fragment, useEffect, useState } from "react";
+import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react";
 import { BellIcon, Bars3Icon, XMarkIcon } from "../../components/icons";
 import Image from "next/image";
+import { useAuth } from "../../hooks/useAuth";
+import useSupabase from "../../hooks/useSupabase";
+import { getDegrees, getSingleTerms, addDegree } from "../../utils/bridge";
+import { toast } from "react-toastify";
 
 const user = {
     name: "Tom Cook",
     email: "tom@example.com",
-    imageUrl:
-        "https://avatars.dicebear.com/api/micah/4.svg",
+    imageUrl: "https://avatars.dicebear.com/api/micah/4.svg",
 };
 const navigation = [
     { name: "Dashboard", href: "#", current: true },
@@ -26,6 +29,189 @@ function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(" ");
 }
 const Dashboard = () => {
+    const { user: account } = useAuth();
+    const { supabase } = useSupabase();
+    const [majors, setMajors] = useState<{
+        id: string;
+        value: string;
+        type: string;
+    }>();
+    const [details, setDetails] = useState<{
+        major: string;
+        minor: string;
+    }>({ major: "", minor: "" });
+    const [degrees, setDegrees] = useState<
+        {
+            id: string;
+            major: string;
+            minor: string;
+            created_at: string | null;
+            created_by: string;
+            last_change: string;
+            access: string[];
+            count: number;
+            courses: number;
+        }[]
+    >([]);
+    const [singles, setSingles] = useState<
+        {
+            id: string;
+            major: string;
+            minor: string;
+            created_at: string | null;
+            created_by: string;
+            last_change: string;
+            access: string[];
+            count: number;
+            term: string;
+        }[]
+    >([]);
+    const [recent, setRecent] = useState<
+        {
+            id: string;
+            major: string;
+            minor: string;
+            created_at: string | null;
+            created_by: string;
+            last_change: string;
+            access: string[];
+            count: number;
+            courses?: number;
+            term?: string;
+        }[]
+    >([]);
+    const [open, setOpen] = useState(false);
+
+
+    const handleAddDegree = async () => {
+        if (!account?.username || !supabase) {
+            toast.error("Failed to add degree");
+            return;
+        }
+        const { data, error, success } = await addDegree(
+            account?.username.toLowerCase(),
+            details.major,
+            details.minor,
+            supabase
+        );
+        if (!success || data === null) {
+            console.log(error);
+            toast.error("Failed to add degree");
+            return;
+        }
+        console.log(data);
+        setDegrees((prev) => {
+            return [
+                ...prev,
+                {
+                    ...data[0],
+                    major:
+                        data[0].major && "name" in data[0].major
+                            ? (data[0].major.name as string)
+                            : "None",
+                    courses:
+                        "Major_Course" in data[0].major &&
+                        Array.isArray(data[0].major.Major_Course)
+                            ? (data[0].major.Major_Course[0].count as number)
+                            : 0,
+                    count:
+                        data[0].Degree_Term &&
+                        Array.isArray(data[0].Degree_Term)
+                            ? data[0].Degree_Term.reduce((prev, term) => {
+                                  return term.Degree_Term_Course &&
+                                      !Array.isArray(term.Degree_Term_Course)
+                                      ? (term.Degree_Term_Course
+                                            .count as number) + prev
+                                      : prev;
+                              }, 0)
+                            : 0,
+                },
+            ];
+        });
+    };
+
+    useEffect(() => {
+        if (!account?.username || !supabase) return;
+        const getData = async () => {
+            const { data, error, success } = await getDegrees(
+                account?.username.toLowerCase(),
+                supabase
+            );
+
+            if (!success || data === null) {
+                // HACK: !data is for typescript
+                console.log(error);
+                toast.error("Failed to fetch data");
+                return;
+            }
+            console.log(data);
+            const degs = data.map((dd) => {
+                return {
+                    ...dd,
+                    major:
+                        dd.major && "name" in dd.major
+                            ? (dd.major.name as string)
+                            : "None",
+                    courses:
+                        "Major_Course" in dd.major &&
+                        Array.isArray(dd.major.Major_Course)
+                            ? (dd.major.Major_Course[0].count as number)
+                            : 0,
+                    count:
+                        dd.Degree_Term && Array.isArray(dd.Degree_Term)
+                            ? dd.Degree_Term.reduce((prev, term) => {
+                                  return term.Degree_Term_Course &&
+                                      !Array.isArray(term.Degree_Term_Course)
+                                      ? (term.Degree_Term_Course
+                                            .count as number) + prev
+                                      : prev;
+                              }, 0)
+                            : 0,
+                };
+            });
+            setDegrees(degs);
+            const {
+                data: rawSingles,
+                error: singlesErr,
+                success: singleSuccess,
+            } = await getSingleTerms(account?.username.toLowerCase(), supabase);
+            if (!singleSuccess || rawSingles === null) {
+                console.log(singlesErr);
+                toast.error("Failed to fetch data");
+                return;
+            }
+            const singies = rawSingles.map((single) => {
+                return {
+                    ...single,
+                    minor: single.minor ? single.minor : "N/A",
+                    count:
+                        single.Single_Term_Section &&
+                        !Array.isArray(single.Single_Term_Section)
+                            ? (single.Single_Term_Section.count as number)
+                            : 0,
+                };
+            });
+            setSingles(singies);
+            setRecent(
+                [...degs, ...singies]
+                    .sort((a, b) => {
+                        return (
+                            new Date(b.last_change as string).getTime() -
+                            new Date(a.last_change as string).getTime()
+                        );
+                    })
+                    .slice(0, 5)
+            );
+        };
+
+        getData();
+    }, [account?.username]);
+    // const [account, setAccount] = useState(instance.getActiveAccount());
+    // useEffect(() => {
+    //     console.log(instance.getActiveAccount());
+    //     setAccount(instance.getActiveAccount());
+    // }, [instance]);
+
     return (
         <div
             className="h-screen w-screen bg-white text-black overflow-scroll"
@@ -46,8 +232,12 @@ const Dashboard = () => {
                                                 <div className="flex-shrink-0">
                                                     <div className="py-2 rounded ml-2 flex justify-start items-center text-white text-2xl">
                                                         <div className="select-none cursor-pointer">
-                                                            <span className="pr-[0.125rem] font-Raleway">my</span>
-                                                            <span className="text-white bg-black p-1 px-2 rounded font-bold font-JetBrainsMono">Degree</span>
+                                                            <span className="pr-[0.125rem] font-Raleway">
+                                                                my
+                                                            </span>
+                                                            <span className="text-white bg-black p-1 px-2 rounded font-bold font-JetBrainsMono">
+                                                                Degree
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -248,7 +438,11 @@ const Dashboard = () => {
                     <header className="py-10">
                         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                             <h1 className="text-3xl font-normal tracking-tight text-white font-Poppins">
-                                Welcome back, <b className="font-bold"> {user.name} </b>
+                                Welcome back,{" "}
+                                <b className="font-semibold">
+                                    {" "}
+                                    {account?.name}{" "}
+                                </b>
                             </h1>
                         </div>
                     </header>
@@ -264,83 +458,140 @@ const Dashboard = () => {
                                     </h2>
                                     <div className="grow h-1 bg-gray-100 mx-4"></div>
                                 </div>
-                                <div className="mt-5 min-h-fit grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                                    {/* Card */}
-                                    <div className="rounded-lg cursor-pointer group">
-                                        <div className="bg-transparent text-white group-hover:shadow-2xl text-center font-Poppins font-semibold flex justify-start">
-                                            <p className="bg-gray-900 w-fit p-2 px-3 rounded-t ml-2 shadow">
-                                                Degree
-                                            </p>
-                                        </div>
-                                        <div className="shadow-lg group-hover:shadow-xl">
-                                            <div className="p-5 rounded-t bg-cyan-700">
-                                                <div className="flex items-center">
-                                                    <div className="w-0 flex-1 flex flex-row items-center justify-center text-2xl font-extrabold">
-                                                        <p className="bg-white p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-cyan-900">
-                                                            BSCSC
-                                                        </p>
-                                                        <p className="font-extrabold mx-5 text-white">
-                                                            /
-                                                        </p>
-                                                        <p className="bg-cyan-900 p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-yellow-500">
-                                                            BA
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="bg-cyan-700 rounded-b border-0 -mt-[0.2px] border-cyan-700 border-t-0">
-                                                <div className="text-sm rounded-b w-full h-full px-5 py-3 bg-cyan-50">
-                                                    <p className="text-cyan-700 font-Lato">
-                                                        <span className="font-extrabold text-cyan-700">
-                                                            <span className="text-red-500 font-semibold">21</span> / 43
-                                                        </span>{" "}
-                                                        courses planned
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="rounded-lg cursor-pointer">
-                                        <div className="bg-white text-cyan-100 text-center font-Poppins font-semibold flex justify-start">
-                                            <p className="bg-cyan-900 w-fit p-2 px-3 rounded-t ml-2 shadow">
-                                                Spring 2021
-                                            </p>
-                                        </div>
-                                        <div className="shadow-lg">
-                                            <div className="p-5 rounded-t bg-cyan-700 shadow-md">
-                                                <div className="flex items-center">
-                                                    <div className="w-0 flex-1 flex flex-row items-center justify-center text-2xl font-extrabold">
-                                                        <p className="bg-white p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-cyan-900">
-                                                            BSCSC
-                                                        </p>
-                                                        <p className="font-extrabold mx-5 text-white">
-                                                            /
-                                                        </p>
-                                                        <p className="bg-cyan-900 p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-yellow-500">
-                                                            BA
+                                {/* Card */}
+                                {recent.length !== 0 ? (
+                                    <>
+                                        <div className="mt-5 min-h-fit grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                            {recent.map((item, index) => (
+                                                <div
+                                                    className="rounded-lg cursor-pointer group"
+                                                    key={index}
+                                                >
+                                                    <div className="bg-transparent text-white group-hover:shadow-2xl text-center font-Poppins font-semibold flex justify-start">
+                                                        <p
+                                                            className="w-fit p-2 px-3 rounded-t ml-2 shadow"
+                                                            style={{
+                                                                backgroundColor:
+                                                                    item.term
+                                                                        ? "#164e63"
+                                                                        : "#000",
+                                                                color: item.term
+                                                                    ? "#cffafe"
+                                                                    : "#fff",
+                                                            }}
+                                                        >
+                                                            {item.term
+                                                                ? item.term
+                                                                : "Degree"}
                                                         </p>
                                                     </div>
+                                                    <div className="shadow-lg group-hover:shadow-xl">
+                                                        <div className="p-5 rounded-t bg-cyan-700">
+                                                            <div className="flex items-center">
+                                                                <div className="w-0 flex-1 flex flex-row items-center justify-center text-2xl font-extrabold">
+                                                                    <p className="bg-white p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-cyan-900">
+                                                                        {
+                                                                            item.major
+                                                                        }
+                                                                    </p>
+                                                                    <p className="font-extrabold mx-5 text-white">
+                                                                        /
+                                                                    </p>
+                                                                    <p className="bg-cyan-900 p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-yellow-500">
+                                                                        {
+                                                                            item.minor
+                                                                        }
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="bg-cyan-700 rounded-b border-0 -mt-[0.2px] border-cyan-700 border-t-0">
+                                                            <div className="text-sm rounded-b w-full h-full px-5 py-3 bg-cyan-50">
+                                                                <p className="text-cyan-700 font-Lato">
+                                                                    <span className="font-extrabold text-cyan-700">
+                                                                        <span
+                                                                            className="text-red-500 font-semibold"
+                                                                            style={{
+                                                                                color: !item.count
+                                                                                    ? "#ef4444"
+                                                                                    : "#0e7490",
+                                                                            }}
+                                                                        >
+                                                                            {
+                                                                                item.count
+                                                                            }
+                                                                        </span>{" "}
+                                                                        {"courses" in
+                                                                        item
+                                                                            ? ` / ${item.courses}`
+                                                                            : ""}
+                                                                    </span>{" "}
+                                                                    {}
+                                                                    courses
+                                                                    planned
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="bg-cyan-700 rounded-b border-0 -mt-[0.2px] border-cyan-700 border-t-0">
-                                                    <div className="text-sm w-full h-full px-5 py-3 bg-cyan-50 rounded-b">
-                                                    <p className="text-cyan-700">
-                                                        <span className="font-bold text-gray-900">
-                                                            <span className="text-cyan-700 font-extrabold">18</span>
-                                                        </span>{" "}
-                                                        credits
-                                                    </p>
-                                                </div>
-                                            </div>
+                                            ))}
                                         </div>
-                                    </div>
-                                </div>
-                                { /* View more button */}
-                                <div className="flex justify-center mt-5">
-                                    <button className="font-Lato text-cyan-700 bg-white hover:bg-gray-100 transition-colors rounded px-2 py-2 font-semibold w-1/3">
-                                        Load More
-                                    </button>
-                                </div>
+                                        {/* View more button */}
+                                        <div className="flex justify-center mt-5">
+                                            <button className="font-Lato text-cyan-700 bg-white hover:bg-gray-100 transition-colors rounded px-2 py-2 font-semibold w-1/3">
+                                                Load More
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div></div>
+                                )}
+                                {/* {
+                                        degrees.slice(3).map((degree) => {
+                                            // degree.
+                                            return (
+                                                <div className="rounded-lg cursor-pointer group">
+                                                    <div className="bg-transparent text-white group-hover:shadow-2xl text-center font-Poppins font-semibold flex justify-start">
+                                                        <p
+                                                            className="bg-gray-900 w-fit p-2 px-3 rounded-t ml-2 shadow"
+                                                            style={{
+                                                                background: degree.type === "Degree" ? "rgb(17 24 39 / 1)" : "rgb(17 24 39 / 0.5)",
+                                                            }}
+                                                        >
+                                                            {degree.type}
+                                                        </p>
+                                                    </div>
+                                                    <div className="shadow-lg group-hover:shadow-xl">
+                                                        <div className="p-5 rounded-t bg-cyan-700">
+                                                            <div className="flex items-center">
+                                                                <div className="w-0 flex-1 flex flex-row items-center justify-center text-2xl font-extrabold">
+                                                                    <p className="bg-white p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-cyan-900">
+                                                                        BSCSC
+                                                                    </p>
+                                                                    <p className="font-extrabold mx-5 text-white">
+                                                                        /
+                                                                    </p>
+                                                                    <p className="bg-cyan-900 p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-yellow-500">
+                                                                        BA
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="bg-cyan-700 rounded-b border-0 -mt-[0.2px] border-cyan-700 border-t-0">
+                                                            <div className="text-sm rounded-b w-full h-full px-5 py-3 bg-cyan-50">
+                                                                <p className="text-cyan-700 font-Lato">
+                                                                    <span className="font-extrabold text-cyan-700">
+                                                                        <span className="text-red-500 font-semibold">21</span> / 43
+                                                                    </span>{" "}
+                                                                    courses planned
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )
+                                        });
+                                    } */}
                             </div>
                             <div className="min-h-fit pb-6">
                                 <div className="flex flex-row items-center">
@@ -351,8 +602,8 @@ const Dashboard = () => {
                                     {/* <button className="font-Lato text-cyan-700 font-semibold">
                                         View All
                                     </button> */}
-                                    <button className="font-Lato text-white bg-cyan-700 rounded px-2 py-2 font-semibold">
-                                        <svg 
+                                    <button onClick={() => setOpen(true)} className="font-Lato text-white bg-cyan-700 rounded px-2 py-2 font-semibold">
+                                        <svg
                                             xmlns="http://www.w3.org/2000/svg"
                                             className="h-5 w-5 mr-1 inline-block"
                                             viewBox="0 0 20 20"
@@ -367,43 +618,90 @@ const Dashboard = () => {
                                         Add New
                                     </button>
                                 </div>
-                                <div className="mt-5 min-h-fit grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                                    {/* Card */}
-                                    <div className="rounded-lg cursor-pointer group">
-                                        <div className="bg-transparent text-white group-hover:shadow-2xl text-center font-Poppins font-semibold flex justify-start">
-                                            <p className="bg-gray-900 w-fit p-2 px-3 rounded-t ml-2 shadow">
-                                                Degree
-                                            </p>
-                                        </div>
-                                        <div className="shadow-lg group-hover:shadow-xl">
-                                            <div className="p-5 rounded-t bg-cyan-700">
-                                                <div className="flex items-center">
-                                                    <div className="w-0 flex-1 flex flex-row items-center justify-center text-2xl font-extrabold">
-                                                        <p className="bg-white p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-cyan-900">
-                                                            BSCSC
-                                                        </p>
-                                                        <p className="font-extrabold mx-5 text-white">
-                                                            /
-                                                        </p>
-                                                        <p className="bg-cyan-900 p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-yellow-500">
-                                                            BA
+                                {/* Card */}
+                                {degrees.length !== 0 ? (
+                                    <div className="mt-5 min-h-fit grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                        {degrees.map((degree, index) => {
+                                            console.log(index);
+
+                                            return (
+                                                <div
+                                                    className="rounded-lg cursor-pointer group"
+                                                    key={index}
+                                                >
+                                                    <div className="bg-transparent text-white group-hover:shadow-2xl text-center font-Poppins font-semibold flex justify-start">
+                                                        <p className="bg-gray-900 w-fit p-2 px-3 rounded-t ml-2 shadow">
+                                                            Degree
                                                         </p>
                                                     </div>
+                                                    <div className="shadow-lg group-hover:shadow-xl">
+                                                        <div className="p-5 rounded-t bg-cyan-700">
+                                                            <div className="flex items-center">
+                                                                <div className="w-0 flex-1 flex flex-row items-center justify-center text-2xl font-extrabold">
+                                                                    <p className="bg-white p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-cyan-900">
+                                                                        {
+                                                                            degree.major
+                                                                        }
+                                                                    </p>
+                                                                    <p className="font-extrabold mx-5 text-white">
+                                                                        /
+                                                                    </p>
+                                                                    <p className="bg-cyan-900 p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-yellow-500">
+                                                                        {
+                                                                            degree.minor
+                                                                        }
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="bg-cyan-700 rounded-b border-0 -mt-[0.2px] border-cyan-700 border-t-0">
+                                                            <div className="text-sm rounded-b w-full h-full px-5 py-3 bg-cyan-50">
+                                                                <p className="text-cyan-700 font-Lato">
+                                                                    <span className="font-extrabold text-cyan-700">
+                                                                        <span className="text-red-500 font-semibold">
+                                                                            {
+                                                                                degree.count
+                                                                            }
+                                                                        </span>{" "}
+                                                                        /{" "}
+                                                                        {
+                                                                            degree.courses
+                                                                        }
+                                                                    </span>{" "}
+                                                                    courses
+                                                                    planned
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="bg-cyan-700 rounded-b border-0 -mt-[0.2px] border-cyan-700 border-t-0">
-                                                <div className="text-sm rounded-b w-full h-full px-5 py-3 bg-cyan-50">
-                                                    <p className="text-cyan-700 font-Lato">
-                                                        <span className="font-extrabold text-cyan-700">
-                                                            <span className="text-red-500 font-semibold">21</span> / 43
-                                                        </span>{" "}
-                                                        courses planned
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
+                                            );
+                                        })}
                                     </div>
-                                </div>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center pt-6">
+                                        {/* sad emoji svg */}
+                                        <p className="font-Lato text-gray-700 font-light text-xl mt-5">
+                                            You have no degree plans yet...
+                                        </p>
+                                        <button className="font-Lato text-white bg-cyan-700 rounded px-2 py-2 font-semibold mt-5">
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                className="h-5 w-5 mr-1 inline-block"
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
+                                            >
+                                                <path
+                                                    fillRule="evenodd"
+                                                    d="M10 3a1 1 0 00-1 1v4H5a1 1 0 100 2h4v4a1 1 0 102 0v-4h4a1 1 0 100-2h-4V4a1 1 0 00-1-1z"
+                                                    clipRule="evenodd"
+                                                />
+                                            </svg>
+                                            Get Started
+                                        </button>
+                                    </div>
+                                )}
+                                {/* </div> */}
                                 {/* <div className="flex justify-center mt-5">
                                     <button className="font-Lato text-cyan-700 bg-gray-100 hover:bg-cyan-700 hover:text-white transition-colors rounded px-2 py-2 font-semibold w-3/5">
                                         Load More
@@ -419,8 +717,8 @@ const Dashboard = () => {
                                     {/* <button className="font-Lato text-cyan-700 font-semibold">
                                         View All
                                     </button> */}
-                                    <button className="font-Lato text-white bg-cyan-700 rounded px-2 py-2 font-semibold">
-                                        <svg 
+                                    <button disabled className="font-Lato opacity-60 cursor-not-allowed text-white bg-cyan-700 rounded px-2 py-2 font-semibold">
+                                        <svg
                                             xmlns="http://www.w3.org/2000/svg"
                                             className="h-5 w-5 mr-1 inline-block"
                                             viewBox="0 0 20 20"
@@ -435,43 +733,82 @@ const Dashboard = () => {
                                         Add New
                                     </button>
                                 </div>
-                                <div className="mt-5 min-h-fit grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                                    {/* Card */}
-                                    <div className="rounded-lg cursor-pointer">
-                                        <div className="bg-white text-cyan-100 text-center font-Poppins font-semibold flex justify-start">
-                                            <p className="bg-cyan-900 w-fit p-2 px-3 rounded-t ml-2 shadow">
-                                                Spring 2021
-                                            </p>
-                                        </div>
-                                        <div className="shadow-lg">
-                                            <div className="p-5 rounded-t bg-cyan-700 shadow-md">
-                                                <div className="flex items-center">
-                                                    <div className="w-0 flex-1 flex flex-row items-center justify-center text-2xl font-extrabold">
-                                                        <p className="bg-white p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-cyan-900">
-                                                            BSCSC
-                                                        </p>
-                                                        <p className="font-extrabold mx-5 text-white">
-                                                            /
-                                                        </p>
-                                                        <p className="bg-cyan-900 p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-yellow-500">
-                                                            BA
+                                {/* Card */}
+                                {singles.length !== 0 ? (
+                                    <div className="mt-5 min-h-fit grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                        {singles.map((single, index) => {
+                                            return (
+                                                <div
+                                                    className="rounded-lg cursor-pointer group"
+                                                    key={index}
+                                                >
+                                                    <div className="bg-white text-cyan-100 text-center group-hover:shadow-xl font-Poppins font-semibold flex justify-start">
+                                                        <p className="bg-cyan-900 w-fit p-2 px-3 rounded-t ml-2 shadow">
+                                                            {single.term}
                                                         </p>
                                                     </div>
+                                                    <div className="shadow-lg group-hover:shadow-xl">
+                                                        <div className="p-5 rounded-t bg-cyan-700 shadow-md">
+                                                            <div className="flex items-center">
+                                                                <div className="w-0 flex-1 flex flex-row items-center justify-center text-2xl font-extrabold">
+                                                                    <p className="bg-white p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-cyan-900">
+                                                                        {
+                                                                            single.major
+                                                                        }
+                                                                    </p>
+                                                                    <p className="font-extrabold mx-5 text-white">
+                                                                        /
+                                                                    </p>
+                                                                    <p className="bg-cyan-900 p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-yellow-500">
+                                                                        {
+                                                                            single.minor
+                                                                        }
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="bg-cyan-700 rounded-b border-0 -mt-[0.2px] border-cyan-700 border-t-0">
+                                                            <div className="text-sm w-full h-full px-5 py-3 bg-cyan-50 rounded-b">
+                                                                <p className="text-cyan-700">
+                                                                    <span className="font-bold text-gray-900">
+                                                                        <span className="text-cyan-700 font-extrabold">
+                                                                            {
+                                                                                single.count
+                                                                            }
+                                                                        </span>
+                                                                    </span>{" "}
+                                                                    courses
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="bg-cyan-700 rounded-b border-0 -mt-[0.2px] border-cyan-700 border-t-0">
-                                                    <div className="text-sm w-full h-full px-5 py-3 bg-cyan-50 rounded-b">
-                                                    <p className="text-cyan-700">
-                                                        <span className="font-bold text-gray-900">
-                                                            <span className="text-cyan-700 font-extrabold">18</span>
-                                                        </span>{" "}
-                                                        credits
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
+                                            );
+                                        })}
                                     </div>
-                                </div>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center py-6">
+                                        {/* sad emoji svg */}
+                                        <p className="font-Lato text-gray-700 font-light text-lg select-none mt-5">
+                                            You have no single term plans yet...
+                                        </p>
+                                        <button disabled className="font-Lato opacity-60 cursor-not-allowed text-white bg-cyan-700 rounded px-2 py-2 font-semibold mt-5">
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                className="h-5 w-5 mr-1 inline-block"
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
+                                            >
+                                                <path
+                                                    fillRule="evenodd"
+                                                    d="M10 3a1 1 0 00-1 1v4H5a1 1 0 100 2h4v4a1 1 0 102 0v-4h4a1 1 0 100-2h-4V4a1 1 0 00-1-1z"
+                                                    clipRule="evenodd"
+                                                />
+                                            </svg>
+                                            Get Started
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                             {/* <div className="flex justify-center mt-5">
                                     <button className="font-Lato text-cyan-700 bg-gray-100 hover:bg-cyan-700 hover:text-white transition-colors rounded px-2 py-2 font-semibold w-3/5">
@@ -480,6 +817,70 @@ const Dashboard = () => {
                                 </div> */}
                         </div>
                     </div>
+                    <Transition appear show={open} as={Fragment}>
+                        <Dialog
+                            as="div"
+                            className="relative z-10"
+                            onClose={() => setOpen(false)}
+                        >
+                            <Transition.Child
+                                as={Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0"
+                                enterTo="opacity-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100"
+                                leaveTo="opacity-0"
+                            >
+                                <div className="fixed inset-0 bg-black bg-opacity-25" />
+                            </Transition.Child>
+
+                            <div className="fixed inset-0 overflow-y-auto">
+                                <div className="flex min-h-full items-center justify-center p-4 text-center">
+                                    <Transition.Child
+                                        as={Fragment}
+                                        enter="ease-out duration-300"
+                                        enterFrom="opacity-0 scale-95"
+                                        enterTo="opacity-100 scale-100"
+                                        leave="ease-in duration-200"
+                                        leaveFrom="opacity-100 scale-100"
+                                        leaveTo="opacity-0 scale-95"
+                                    >
+                                        <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-lg bg-white p-6 text-left align-middle shadow-xl transition-all">
+                                            <Dialog.Title
+                                                as="h3"
+                                                className="text-lg font-semibold leading-6 text-gray-900 font-Poppins"
+                                            >
+                                                New Degree
+                                            </Dialog.Title>
+                                            <div className="mt-2">
+                                                <p className="text-sm text-gray-500">
+                                                    Your payment has been
+                                                    successfully submitted.
+                                                    We&apos;ve sent you an email with
+                                                    all of the details of your
+                                                    order.
+                                                </p>
+                                            </div>
+
+                                            <div className="mt-4">
+                                                <button
+                                                    type="button"
+                                                    className="inline-flex justify-center rounded-md border border-transparent bg-sky-100 px-4 py-2 text-sm font-medium text-cyan-900 hover:bg-sky-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2"
+                                                    onClick={() => {
+                                                        setOpen(false);
+                                                        handleAddDegree();
+                                                    }}
+                                                >
+                                                    Add
+                                                </button>
+                                            </div>
+                                        </Dialog.Panel>
+                                    </Transition.Child>
+                                </div>
+                            </div>
+                        </Dialog>
+                    </Transition>
                 </main>
             </div>
         </div>

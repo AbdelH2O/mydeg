@@ -9,6 +9,7 @@ import Top from '../../components/Top';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { useCourses } from '../../hooks/useCourses';
 import { addCourse } from '../../utils/bridge';
+import useSupabase from '../../hooks/useSupabase';
 
 const edgeTypes = {
     smart: SmartStepEdge
@@ -19,6 +20,7 @@ const Degree = () => {
     const [show, setShow] = useState(false);
     const [flow, setFlow] = useState<ReactFlowInstance>();
     // const ref = useRef<HTMLDivElement>();
+    const { supabase } = useSupabase();
     const [ref, setRef] = useState<HTMLDivElement>();
     const onRefChange = useCallback((node: HTMLDivElement) => {
         if (node !== null) { 
@@ -64,7 +66,7 @@ const Degree = () => {
                         active.id as string
                     ]
                 );
-                addCourse((over.id as string).slice(0, 36), active.id as string);
+                addCourse((over.id as string).slice(0, 36), active.id as string, supabase);
                 setUsed({...used, [active.id as string]: index});
                 setMap(new Map(map));
             }
@@ -72,23 +74,25 @@ const Degree = () => {
     };
 
     return (
-        <div className='h-screen w-screen flex flex-col overflow-hidden'>
+        <div className='h-[calc(100vh-4rem)] mt-16 w-screen flex flex-col overflow-hidden'>
             <DndContext
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
             >
                 <Top />
-                <div className='flex-grow w-full flex flex-row justify-end bg-cyan-100'>
+                <div className='flex-grow w-full flex flex-row justify-end bg-cyan-100 overflow-hidden'>
                     <SideBar onSideBarRefChange={onRefChange} show={show} setShow={setShow} />
-                    <div className='z-10 overflow-hidden h-full shadow-2xl' style={{width: show ? '75vw' : '98.5vw', transition: 'all 0.3s ease-in-out'}}>
+                    <div className='z-[999] overflow-hidden h-full shadow-2xl' style={{width: show ? '75vw' : '98.5vw', transition: 'all 0.3s ease-in-out'}}>
                         <DragOverlay
                             zIndex={100}
                             style={{
                                 animation: "resize 0.07s ease",
                                 "--scale": flow?.getZoom().toString(),
+                                height: "calc(100vh-4rem)",
+                                position: "fixed"
                             } as React.CSSProperties}
                             dropAnimation={{
-                                duration: 500,
+                                duration: 250,
                                 keyframes: (params) => {
                                     return [
                                         { opacity: 1 },
@@ -100,11 +104,12 @@ const Degree = () => {
                             {
                                 activeId ? (
                                     <div
-                                        className="px-4 z-50 py-2 border-2 rounded custom-drag-handle text-sm w-fit whitespace-nowrap"
+                                        className="px-4 z-[9999999] py-2 border-2 rounded custom-drag-handle text-sm w-fit whitespace-nowrap"
                                         style={{
                                                 boxShadow: "-3px 5px #000",
                                                 backgroundColor: colors[activeId],
-                                                borderColor: colors[activeId],
+                                                // borderColor: colors[activeId],
+                                                borderColor: 'black'
                                         }}
                                     >
                                         <div className="text-white font-JetBrainsMono bg-black px-1 rounded">
@@ -115,7 +120,7 @@ const Degree = () => {
                             }
                         </DragOverlay>
                         <ReactFlow
-                            style={{background: '#cffafe'}}
+                            style={{background: '#cffafe', overflow: 'hidden', position: 'fixed'}}
                             nodes={nodes}
                             edges={edges}
                             fitView={true}

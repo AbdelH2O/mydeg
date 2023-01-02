@@ -2,10 +2,13 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { Edge, MarkerType, Node } from "reactflow";
 import { CoursesContext } from "../../hooks/useCourses";
-import supabase from "../../utils/supabaseClient";
+// import supabase from "../../utils/supabaseClient";
+import useSupabase from "../../hooks/useSupabase";
 import { defaultTerms } from "../../enums/terms";
 import { abreviations } from "../../enums/abr";
 import NProgress from "nprogress";
+import { SupabaseClient } from "@supabase/supabase-js";
+import { Database } from "../../Database";
 
 export const CoursesProvider = ({
     children,
@@ -28,6 +31,7 @@ export const CoursesProvider = ({
     const [activeId, setActiveId] = useState<string>("");
     const [used, setUsed] = useState<{[key: string]: number}>({});
     const [req, setReq] = useState<{[key: string]: string[]}>({});
+    const { supabase } = useSupabase();
 
     useEffect(() => {
         if(id) {
@@ -35,16 +39,16 @@ export const CoursesProvider = ({
                 setLoading(true);
                 NProgress.set(0.3);
                 NProgress.start();
-                const mm = await getDegree(id as string, setMajorMinor, coursesMap, setTerms, setUsed);
-                mm.major && (await getCourses(mm.major, setNodes, setEdges, setColors, setReq));
+                const mm = await getDegree(id as string, setMajorMinor, coursesMap, setTerms, setUsed, supabase);
+                mm.major && (await getCourses(mm.major, setNodes, setEdges, setColors, setReq, supabase));
                 mm.minor && (NProgress.done());
                 setLoading(false);
             })();
         }
-        supabase.auth.setSession({
-            access_token: 'ey',
-            refresh_token: 'ey',
-        })
+        // supabase.auth.setSession({
+        //     access_token: 'ey',
+        //     refresh_token: 'ey',
+        // })
     }, [id]);
     return (
         <CoursesContext.Provider
@@ -76,7 +80,8 @@ const getDegree = async (
     setMajorMinor: React.Dispatch<React.SetStateAction<{major: string, minor: string}>>,
     coursesMap: Map<string, string[]>,
     setTerms: React.Dispatch<React.SetStateAction<{[key: string]: string}>>,
-    setUsed: React.Dispatch<React.SetStateAction<{[key: string]: number}>>
+    setUsed: React.Dispatch<React.SetStateAction<{[key: string]: number}>>,
+    supabase: SupabaseClient<Database>
 ) => {
     const { data, error } = await supabase
         .from("Degree")
@@ -131,6 +136,7 @@ const getCourses = async (
     setEdges: React.Dispatch<React.SetStateAction<Edge[]>>,
     setColors: React.Dispatch<React.SetStateAction<{[key: string]: string}>>,
     setReq: React.Dispatch<React.SetStateAction<{[key: string]: string[]}>>,
+    supabase: SupabaseClient<Database>
 ) => {
     const { data, error } = await supabase
         .from("Majors")

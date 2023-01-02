@@ -1,4 +1,4 @@
-import { msalLogin } from "../../components/providers/AuthProvider";
+import { msalLogin } from "../../components/provider/AuthProvider";
 import { Lock, Outlook, Email } from "../../components/icons";
 import { useRouter } from "next/router";
 

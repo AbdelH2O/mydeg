@@ -7,6 +7,7 @@ import { defaultTerms } from "../enums/terms";
 import Droppable from "./Droppable";
 import { addTerm, removeCourse } from "../utils/bridge";
 import { useRouter } from "next/router";
+import useSupabase from "../hooks/useSupabase";
 
 const SideBar = (
     {
@@ -25,10 +26,11 @@ const SideBar = (
     const [display, setDisplay] = React.useState(false);
     const { terms, setTerms, map, setMap, colors, used, setUsed, activeId, req } = useCourses();
     const { id } = useRouter().query;
+    const { supabase } = useSupabase();
 
     const handleAddTerm = async () => {
         const term = Object.keys(defaultTerms)[Object.keys(terms).length];
-        const { id: termId, success } = await addTerm(id as string, term);
+        const { id: termId, success } = await addTerm(id as string, term, supabase);
         if(success) {
             map.set(termId as string, []);
             setMap(map);
@@ -43,7 +45,7 @@ const SideBar = (
         e.preventDefault();
         delete used[(e.target as HTMLElement).innerText];
         setUsed(used);
-        removeCourse((e.target as HTMLElement).dataset.term!, (e.target as HTMLElement).innerText);
+        removeCourse((e.target as HTMLElement).dataset.term!, (e.target as HTMLElement).innerText, supabase);
         map.set((e.target as HTMLElement).dataset.term!, map.get((e.target as HTMLElement).dataset.term!)!.filter(c => c !== (e.target as HTMLElement).innerText));
         setMap(map);
         setTerms({...terms});
@@ -75,21 +77,20 @@ const SideBar = (
     }
 
     return (
-        <>
+        <div className="h-[calc(100vh-4rem)] absolute">
             <div 
-                className="h-full border border-sky-300/50 absolute z-20 resize-x"
-                style={{left: show ? '25vw' : '1.5vw', transition: 'all 0.3s ease-in-out', cursor: show ? 'ew-resize' : 'auto'}}
+                className="h-full border border-sky-300/50 absolute z-[9999] resize-x"
+                style={{right: show ? '75vw' : '98.5vw', transition: 'all 0.3s ease-in-out', cursor: show ? 'ew-resize' : 'auto'}}
                 onMouseEnter={() => {if(!show) setHovering(true)}}
                 onMouseLeave={() => {if(!show || hovering) setHovering(false)}}
             ></div>
             <div
-                className={`bg-white h-[calc(100%-3.5rem)] left-0 fixed`}
+                className={`bg-white h-[calc(100vh-4rem)] left-0 fixed z-50`}
                 style={{width: '25vw', marginLeft: show ? '0' : '-23.5vw', cursor: !show ? 'pointer' : 'default', backdropFilter: hovering ? 'blur(4px)' : 'none', transition: 'all 0.3s ease-in-out'}}
                 onClick={() => {if(!show) {handleClose}}}
                 onMouseEnter={() => {if(!show) setHovering(true)}}
                 onMouseLeave={() => {if(!show || hovering) setHovering(false)}}
             >
-                <div className="absolute w-full h-full bg-white z-50" style={{display: !display ? 'block' : 'none'}} onClick={handleClose}></div>
                 <div className="w-full h-full flex flex-col justify-start items-center pb-2 overflow-y-scroll" ref={onSideBarRefChange}>
                     {/* {
                         show ?
@@ -178,7 +179,7 @@ const SideBar = (
                                 {
                                     Object.keys(terms).length < 8 ?
                                     <div className="w-full h-16 px-4 mb-2">
-                                        <div onClick={handleAddTerm} className="w-full bg-cyan-100 border-cyan-300 border-dashed border h-full my-4 rounded flex justify-center items-center cursor-pointer">
+                                        <div onClick={handleAddTerm} className="w-full bg-cyan-100 border-cyan-300 border-dashed border h-full my-4 rounded flex justify-center items-center cursor-pointer hover:shadow-xl transition-shadow">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height={40} width={40} fill={'#0891b2'}>
                                                 <g data-name="Layer 2">
                                                     <g data-name="plus-circle">
@@ -198,31 +199,36 @@ const SideBar = (
                 </div>
             </div>
             {/* <div className="h-full border border-neutral-300 absolute left-[2vw] z-50 cursor-ew-resize hover:brightness-105 hover:"></div> */}
-            <div
-                className={`z-[999999] top-1/2 absolute -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full shadow-xl bg-white cursor-pointer `}
-                style={{
-                    left: show ? '25vw' : '1.5vw',
-                    transition: 'all 0.3s ease-in-out, background-color 0.1s ease-in-out, fill 0.1s ease-in-out',
-                    backgroundColor: !hovering ? 'white' : '#0e7490',
-                    // filter: !hovering ? 'brightness(100%)' : 'brightness(110%)',
-                    // boxShadow: '-3px 5px #000',
-                }}
-                onClick={handleClose}
-                onMouseEnter={() => setHovering(true)}
-                onMouseLeave={() => setHovering(false)}
-            >
-                <svg fill={!hovering ? 'black' : 'white'} onMouseEnter={() => setHovering(true)} onMouseLeave={() => setHovering(false)} style={{transform: show ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'all 0.1s ease-in-out'}} xmlns="http://www.w3.org/2000/svg" enableBackground="new 0 0 64 64" viewBox="0 0 64 64">
-                    <path
-                        className={"cursor-pointer "}
-                        // style={{fill: hovering ? '#ffffff' : '#000000', transition: 'all 0.3s ease-in-out, fill 0.2s ease-in-out'}}
-                        d="m-210.9-289-2-2 11.8-11.7-11.8-11.7 2-2 13.8 13.7-13.8 13.7"
-                        transform="translate(237 335)"
-                        onMouseEnter={() => setHovering(true)}
-                        onMouseLeave={() => setHovering(false)}
-                    />
-                </svg>
+            <div className="group h-fit w-screen">
+                <div className="w-[25vw] h-[calc(100vh-4rem)] bg-white z-[99] absolute peer cursor-pointer" style={{display: !display ? 'block' : 'none', marginLeft: show ? '0' : '-23.5vw'}} onClick={handleClose}></div>
+                <div
+                    className={`z-[9999] group-hover:bg-cyan-500 peer-hover:bg-cyan-500 top-1/2 absolute translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full shadow-xl bg-white cursor-pointer `}
+                    style={{
+                        right: show ? '75vw' : '98.5vw',
+                        transition: 'all 0.3s ease-in-out, background-color 0.1s ease-in-out, fill 0.1s ease-in-out',
+                        // backgroundColor: !hovering ? 'white' : '#0e7490',
+                        // filter: !hovering ? 'brightness(100%)' : 'brightness(110%)',
+                        // boxShadow: '-3px 5px #000',
+                    }}
+                    onClick={handleClose}
+                    // onMouseEnter={() => setHovering(true)}
+                    // onMouseLeave={() => setHovering(false)}
+                >
+                    <svg className="group-hover:fill-white peer-hover:fill-white fill-black" fill={!hovering ? 'black' : 'white'} 
+                        // onMouseEnter={() => setHovering(true)} onMouseLeave={() => setHovering(false)} 
+                        style={{transform: show ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'all 0.1s ease-in-out'}} xmlns="http://www.w3.org/2000/svg" enableBackground="new 0 0 64 64" viewBox="0 0 64 64">
+                        <path
+                            className={"cursor-pointer group-hover:fill-current group-hover:text-white peer-hover:fill-current peer-hover:text-white"}
+                            // style={{fill: hovering ? '#ffffff' : '#000000', transition: 'all 0.3s ease-in-out, fill 0.2s ease-in-out'}}
+                            d="m-210.9-289-2-2 11.8-11.7-11.8-11.7 2-2 13.8 13.7-13.8 13.7"
+                            transform="translate(237 335)"
+                            // onMouseEnter={() => setHovering(true)}
+                            // onMouseLeave={() => setHovering(false)}
+                        />
+                    </svg>
+                </div>
             </div>
-        </>
+        </div>
     );
 };
 
