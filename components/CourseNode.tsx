@@ -14,7 +14,7 @@ const CourseNode: FC<NodeProps> = ({ data, dragHandle }) => {
         ? {
             //   transform: CSS.Translate.toString(transform),
             opacity: 0.5,
-          }
+        }
         : undefined;
 
     const { used, req } = useCourses();
@@ -26,24 +26,33 @@ const CourseNode: FC<NodeProps> = ({ data, dragHandle }) => {
             ref={!used.hasOwnProperty(data.code) && unlocked ? setNodeRef : undefined}
             {...listeners}
             {...attributes}
-            className="px-4 py-2 border-2 border-black rounded"
+            className="px-4 py-2 border-black shadow-xl hover:shadow-2xl" 
             style={{
                 ...style,
                 ...{
-                    boxShadow: `-3px 5px ${unlocked ? "#000" : "#000"}`,
-                    backgroundColor: unlocked ? data.background : "#404040",
+                    // boxShadow: `-3px 5px #000`,
+                    backgroundColor: used.hasOwnProperty(data.code) ? data.background : (unlocked ? 'white' : "#737373"),
+                    // backgroundColor: unlocked ? 'white' : "#404040",
+                    // backgroundColor: "white",
                     zIndex: 9999999,
                     transition: "all 0.2s ease-in-out",
                     opacity: used.hasOwnProperty(data.code) ? 0.5 : 1,
                     cursor: used.hasOwnProperty(data.code) || !unlocked ? "not-allowed" : "grab",
                     // filter: !unlocked ? "grayscale(100%)" : "none",
-                    borderColor: "#000",
+                    // borderColor: "#000",
+                    // borderColor: "#404040",
+                    borderLeftColor: unlocked ? data.background : "#737373",
+                    borderLeftWidth: "0.25rem",
+                    // borderRightColor: unlocked ? data.background : "#404040",
                     // borderRadius: "0.25rem",
                 },
             }}
         >
             <div 
-                className="text-white font-JetBrainsMono bg-black px-1 rounded" 
+                className="text-black font-black font-JetBrainsMono px-1 rounded"
+                style={{
+                    color: unlocked ? "black" : "white",
+                }}
             >
                 {data.code}
             </div>

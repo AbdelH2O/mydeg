@@ -53,6 +53,11 @@ const SideBar = (
 
     // Checks whether or not we can add the actively dragged element to the term at the specified index
     const addable = (index: number) => {
+        console.log(req[activeId], used[activeId], activeId, index);
+        req[activeId] && req[activeId].forEach((requirement) => {
+            console.log(requirement, used[requirement], index);
+            
+        });
         return (
             !req[activeId] ||
             req[activeId]
@@ -79,7 +84,7 @@ const SideBar = (
     return (
         <div className="h-[calc(100vh-4rem)] absolute">
             <div 
-                className="h-full border border-sky-300/50 absolute z-[9999] resize-x"
+                className="h-full border border-cyan-800 absolute z-[9999] resize-x"
                 style={{right: show ? '75vw' : '98.5vw', transition: 'all 0.3s ease-in-out', cursor: show ? 'ew-resize' : 'auto'}}
                 onMouseEnter={() => {if(!show) setHovering(true)}}
                 onMouseLeave={() => {if(!show || hovering) setHovering(false)}}

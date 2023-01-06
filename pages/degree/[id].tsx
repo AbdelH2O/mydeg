@@ -120,7 +120,10 @@ const Degree = () => {
                             }
                         </DragOverlay>
                         <ReactFlow
-                            style={{background: '#cffafe', overflow: 'hidden', position: 'fixed'}}
+                            style={{
+                                // background: '#cffafe',
+                                background: '#ecfeff',
+                                overflow: 'hidden', position: 'fixed'}}
                             nodes={nodes}
                             edges={edges}
                             fitView={true}

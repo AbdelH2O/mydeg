@@ -26,12 +26,13 @@ const SelectorNode: FC<NodeProps> = ({ data, dragHandle }) => {
             ref={!used.hasOwnProperty(data.code) && unlocked ? setNodeRef : undefined}
             {...listeners}
             {...attributes}
-            className="px-4 py-2 border-2 border-black rounded"
+            className="px-4 py-2 border-2 border-black"
             style={{
                 ...style,
                 ...{
-                    boxShadow: `-3px 5px ${unlocked ? "#000" : "#000"}`,
-                    background: unlocked ? "linear-gradient(to right, rgb(185, 28, 28), rgb(109, 40, 217), rgb(202, 138, 4), rgb(185, 28, 28)) 0% 0% / 200%" : "#404040",
+                    // boxShadow: `-3px 5px ${unlocked ? "#000" : "#000"}`,
+                    backgroundColor: unlocked ? 'white' : "#404040",
+                    // background: unlocked ? "linear-gradient(to right, rgb(185, 28, 28), rgb(109, 40, 217), rgb(202, 138, 4), rgb(185, 28, 28)) 0% 0% / 200%" : "#404040",
                     animation: "1.5s linear 0s infinite normal none running background-pan",
                     zIndex: 9999999,
                     transition: "all 0.2s ease-in-out",
@@ -44,7 +45,7 @@ const SelectorNode: FC<NodeProps> = ({ data, dragHandle }) => {
             }}
         >
             <div 
-                className="text-white font-JetBrainsMono bg-black px-1 rounded" 
+                className="text-black font-black font-JetBrainsMono px-1 rounded" 
             >
                 {data.code}
             </div>
