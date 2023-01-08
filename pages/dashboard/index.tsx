@@ -82,7 +82,6 @@ const Dashboard = () => {
     >([]);
     const [open, setOpen] = useState(false);
 
-
     const handleAddDegree = async () => {
         if (!account?.username || !supabase) {
             toast.error("Failed to add degree");
@@ -602,7 +601,10 @@ const Dashboard = () => {
                                     {/* <button className="font-Lato text-cyan-700 font-semibold">
                                         View All
                                     </button> */}
-                                    <button onClick={() => setOpen(true)} className="font-Lato text-white bg-cyan-700 rounded px-2 py-2 font-semibold">
+                                    <button
+                                        onClick={() => setOpen(true)}
+                                        className="font-Lato text-white bg-cyan-700 rounded px-2 py-2 font-semibold"
+                                    >
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
                                             className="h-5 w-5 mr-1 inline-block"
@@ -717,7 +719,10 @@ const Dashboard = () => {
                                     {/* <button className="font-Lato text-cyan-700 font-semibold">
                                         View All
                                     </button> */}
-                                    <button disabled className="font-Lato opacity-60 cursor-not-allowed text-white bg-cyan-700 rounded px-2 py-2 font-semibold">
+                                    <button
+                                        disabled
+                                        className="font-Lato opacity-60 cursor-not-allowed text-white bg-cyan-700 rounded px-2 py-2 font-semibold"
+                                    >
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
                                             className="h-5 w-5 mr-1 inline-block"
@@ -792,7 +797,10 @@ const Dashboard = () => {
                                         <p className="font-Lato text-gray-700 font-light text-lg select-none mt-5">
                                             You have no single term plans yet...
                                         </p>
-                                        <button disabled className="font-Lato opacity-60 cursor-not-allowed text-white bg-cyan-700 rounded px-2 py-2 font-semibold mt-5">
+                                        <button
+                                            disabled
+                                            className="font-Lato opacity-60 cursor-not-allowed text-white bg-cyan-700 rounded px-2 py-2 font-semibold mt-5"
+                                        >
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
                                                 className="h-5 w-5 mr-1 inline-block"
@@ -857,9 +865,9 @@ const Dashboard = () => {
                                                 <p className="text-sm text-gray-500">
                                                     Your payment has been
                                                     successfully submitted.
-                                                    We&apos;ve sent you an email with
-                                                    all of the details of your
-                                                    order.
+                                                    We&apos;ve sent you an email
+                                                    with all of the details of
+                                                    your order.
                                                 </p>
                                             </div>
 
