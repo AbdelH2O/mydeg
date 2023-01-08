@@ -5,11 +5,13 @@ import SelectorNode from '../../components/SelectorNode';
 import 'reactflow/dist/style.css';
 import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import SideBar from '../../components/SideBar';
+import RightBar from '../../components/RightBar';
 import Top from '../../components/Top';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { useCourses } from '../../hooks/useCourses';
 import { addCourse } from '../../utils/bridge';
 import useSupabase from '../../hooks/useSupabase';
+import { SIDEBAR } from '../../types/SideBar';
 
 const edgeTypes = {
     smart: SmartStepEdge
@@ -17,7 +19,7 @@ const edgeTypes = {
 
 const Degree = () => {
     const nodeTypes = useMemo(() => ({ courseNode: CourseNode, selectorNode: SelectorNode }), []);
-    const [show, setShow] = useState(false);
+    // const [show, setShow] = useState(false);
     const [flow, setFlow] = useState<ReactFlowInstance>();
     // const ref = useRef<HTMLDivElement>();
     const { supabase } = useSupabase();
@@ -29,22 +31,17 @@ const Degree = () => {
         }
     }, []);
 
-    const { nodes, edges, map, setMap, activeId, setActiveId, terms, req, colors, used, setUsed } = useCourses();
+    const { nodes, sideBar, edges, map, setMap, activeId, setActiveId, terms, req, colors, used, setUsed } = useCourses();
 
     const handleDragStart = (event: DragStartEvent) => {
         setActiveId(typeof(event.active.id) === 'string' ? event.active.id : event.active.id.toString());
-        console.log(window.innerHeight)
         const lowestIndex = req[event.active.id] ? Math.max(...req[event.active.id].map((r) => used[r])) + 1 : 0;
-        console.log(window.innerHeight * 0.35 * lowestIndex);
-        console.log(ref);
-        
         ref && ref.scrollTo({ top: window.innerHeight * 0.35 * lowestIndex, behavior: 'smooth' });
     }
 
     const handleDragEnd = (event: DragEndEvent) => {
         const {over, active} = event;
         setActiveId('');
-        console.log(map, used);
         
         if (over && over.id && active && active.id) {
             if(!map.get((over.id as string).slice(0, 36))?.includes(active.id as string)) {
@@ -81,8 +78,8 @@ const Degree = () => {
             >
                 <Top />
                 <div className='flex-grow w-full flex flex-row justify-end bg-cyan-100 overflow-hidden'>
-                    <SideBar onSideBarRefChange={onRefChange} show={show} setShow={setShow} />
-                    <div className='z-[999] overflow-hidden h-full shadow-2xl' style={{width: show ? '75vw' : '98.5vw', transition: 'all 0.3s ease-in-out'}}>
+                    <SideBar onSideBarRefChange={onRefChange}/>
+                    <div className='z-[999] overflow-hidden h-full shadow-2xl' style={{width: sideBar === SIDEBAR.NONE ? '98.5vw' : ( sideBar === SIDEBAR.COURSES ? '75vw' : '73.5vw'), position: 'relative', right: sideBar !== SIDEBAR.INFO ? 0 : '25vw', transition: 'all 0.3s ease-in-out'}}>
                         <DragOverlay
                             zIndex={100}
                             style={{
@@ -142,6 +139,7 @@ const Degree = () => {
                             <Controls />
                         </ReactFlow>
                     </div>
+                    <RightBar />
                 </div>
             </DndContext>
         </div>

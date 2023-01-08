@@ -61,6 +61,8 @@ export interface Database {
           created_by: string
           access: string[]
           last_change: string
+          special: string | null
+          start: number
         }
         Insert: {
           id?: string
@@ -70,6 +72,8 @@ export interface Database {
           created_by: string
           access?: string[]
           last_change?: string
+          special?: string | null
+          start?: number
         }
         Update: {
           id?: string
@@ -79,6 +83,8 @@ export interface Database {
           created_by?: string
           access?: string[]
           last_change?: string
+          special?: string | null
+          start?: number
         }
       }
       Degree_Term: {
@@ -151,6 +157,29 @@ export interface Database {
           color?: string
           x?: number
           y?: number
+        }
+      }
+      Major_Course_Selected: {
+        Row: {
+          id: number
+          course: string
+          user: string
+          parent: string
+          degree: string
+        }
+        Insert: {
+          id?: number
+          course: string
+          user: string
+          parent: string
+          degree: string
+        }
+        Update: {
+          id?: number
+          course?: string
+          user?: string
+          parent?: string
+          degree?: string
         }
       }
       Majors: {

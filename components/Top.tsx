@@ -27,7 +27,7 @@ const Top = () => {
                         <p
                             className="font-JetBrainsMono font-extrabold px-4 py-2 rounded text-2xl text-yellow-500"
                         >
-                            {minor}
+                            {minor.split("/")[1]}
                         </p>
                     </div>
                 </div>

@@ -1,6 +1,6 @@
 import { useDroppable } from "@dnd-kit/core";
 import Image from "next/image";
-import React, { Dispatch, Fragment, MouseEventHandler, MutableRefObject, SetStateAction } from "react";
+import React, { Dispatch, Fragment, MouseEventHandler, MutableRefObject, SetStateAction, useEffect } from "react";
 import { useCourses } from "../hooks/useCourses";
 import styles from "../styles/sideBar.module.css";
 import { defaultTerms } from "../enums/terms";
@@ -8,23 +8,20 @@ import Droppable from "./Droppable";
 import { addTerm, removeCourse } from "../utils/bridge";
 import { useRouter } from "next/router";
 import useSupabase from "../hooks/useSupabase";
+import { SIDEBAR } from "../types/SideBar";
 
 const SideBar = (
     {
-        show,
-        setShow,
         onSideBarRefChange
     } : 
     {
-        show: boolean,
-        setShow: Dispatch<SetStateAction<boolean>>,
         onSideBarRefChange: (node: HTMLDivElement) => void
     }
     
 ) => {
     const [hovering, setHovering] = React.useState(false);
     const [display, setDisplay] = React.useState(false);
-    const { terms, setTerms, map, setMap, colors, used, setUsed, activeId, req } = useCourses();
+    const { terms, sideBar, setSideBar, setTerms, map, setMap, colors, used, setUsed, activeId, req } = useCourses();
     const { id } = useRouter().query;
     const { supabase } = useSupabase();
 
@@ -62,19 +59,29 @@ const SideBar = (
         );
     }
 
+    const show = sideBar === SIDEBAR.COURSES;
+
     const handleClose = () => {
         if(show) {
-            setShow(!show);
+            setSideBar(SIDEBAR.NONE);
             setHovering(false);
             setTimeout(() => {
                 setDisplay(!display);
             }, 300);
         } else {
             setDisplay(!display);
-            setShow(!show);
+            setSideBar(SIDEBAR.COURSES);
             setHovering(false);
         }
     }
+
+    useEffect(() => {
+        if(sideBar === SIDEBAR.INFO && display) {
+            setTimeout(() => {
+                setDisplay(false);
+            }, 300);
+        }
+    }, [sideBar]);
 
     return (
         <div className="h-[calc(100vh-4rem)] absolute">

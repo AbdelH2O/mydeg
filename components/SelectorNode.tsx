@@ -1,31 +1,48 @@
 import { useDraggable } from "@dnd-kit/core";
 import React, { FC, memo } from "react";
 import { Handle, NodeProps, Position, WrapNodeProps } from "reactflow";
-import { CSS } from "@dnd-kit/utilities";
-import { CustomNode } from "../types";
 import { useCourses } from "../hooks/useCourses";
+import { SIDEBAR } from "../types/SideBar";
 
 const SelectorNode: FC<NodeProps> = ({ data, dragHandle }) => {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
         id: data.code,
         data: data,
     });
+    
     const style = transform
         ? {
             //   transform: CSS.Translate.toString(transform),
             opacity: 0.5,
-          }
+        }
         : undefined;
+    // console.log(listeners);
+    
 
-    const { used, req } = useCourses();
-
+    const { used, req, sideBar, setSideBar, setInfoCourse, infoCourse } = useCourses();
+    const selected = !(data.children as { course: string, selected: boolean }[]).some((child) => !child.selected);
     const unlocked = req[data.code] === undefined || req[data.code].every((r) => used[r] !== undefined);
+    const handleClick: React.MouseEventHandler<HTMLDivElement> = (e) => {        
+        if(sideBar !== SIDEBAR.INFO) setSideBar(SIDEBAR.INFO);
+        if(infoCourse.id !== data.code) setInfoCourse({ id: data.code, name: data.name, children: data.children });
+        listeners && listeners.onKeyDown(e);
+    };
+
+    const atrr = selected ? { ...attributes, ...listeners } : {};
     
     return (
         <div
-            ref={!used.hasOwnProperty(data.code) && unlocked ? setNodeRef : undefined}
-            {...listeners}
-            {...attributes}
+            ref={
+                selected ?
+                (
+                    (!used.hasOwnProperty(data.code) && unlocked && sideBar === SIDEBAR.COURSES) ?
+                    setNodeRef :
+                    undefined
+                ) :
+                undefined
+            }
+            {...atrr}
+            onClick={handleClick}
             className="px-4 py-2 border-2 border-black rounded"
             style={{
                 ...style,
@@ -36,7 +53,7 @@ const SelectorNode: FC<NodeProps> = ({ data, dragHandle }) => {
                     zIndex: 9999999,
                     transition: "all 0.2s ease-in-out",
                     opacity: used.hasOwnProperty(data.code) ? 0.5 : 1,
-                    cursor: used.hasOwnProperty(data.code) || !unlocked ? "not-allowed" : "grab",
+                    cursor: !selected ? "pointer" : (used.hasOwnProperty(data.code) || !unlocked ? "not-allowed" : "grab"),
                     // filter: !unlocked ? "grayscale(100%)" : "none",
                     borderColor: "#000",
                     // borderRadius: "0.25rem",

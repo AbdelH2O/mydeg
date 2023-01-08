@@ -9,6 +9,7 @@ import { abreviations } from "../../enums/abr";
 import NProgress from "nprogress";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../Database";
+import { SIDEBAR } from "../../types/SideBar";
 
 export const CoursesProvider = ({
     children,
@@ -26,11 +27,18 @@ export const CoursesProvider = ({
     const [nodes, setNodes] = useState<Node[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
     const [loading, setLoading] = useState(true);
+    const [sideBar, setSideBar] = useState<SIDEBAR>(SIDEBAR.NONE);
     const [terms, setTerms] = useState<{[key: string]: string}>({});
     const [colors, setColors] = useState<{[key: string]: string}>({});
     const [activeId, setActiveId] = useState<string>("");
+    /* Dictionary to keep track of whether or not a course was added, and the term it was added to. */
     const [used, setUsed] = useState<{[key: string]: number}>({});
     const [req, setReq] = useState<{[key: string]: string[]}>({});
+    const [infoCourse, setInfoCourse] = useState<{
+        id: string;
+        name: string;
+        children?: {course: string, name: string, selected: boolean}[];
+    }>({ id: "", name: "", children: []});
     const { supabase } = useSupabase();
 
     useEffect(() => {
@@ -40,15 +48,11 @@ export const CoursesProvider = ({
                 NProgress.set(0.3);
                 NProgress.start();
                 const mm = await getDegree(id as string, setMajorMinor, coursesMap, setTerms, setUsed, supabase);
-                mm.major && (await getCourses(mm.major, setNodes, setEdges, setColors, setReq, supabase));
+                mm.major && (await getCourses(mm.major, id as string, setNodes, setEdges, setColors, setReq, supabase));
                 mm.minor && (NProgress.done());
                 setLoading(false);
             })();
         }
-        // supabase.auth.setSession({
-        //     access_token: 'ey',
-        //     refresh_token: 'ey',
-        // })
     }, [id]);
     return (
         <CoursesContext.Provider
@@ -67,7 +71,11 @@ export const CoursesProvider = ({
                 used,
                 setUsed,
                 req,
-                setReq
+                setReq,
+                sideBar,
+                setSideBar,
+                infoCourse,
+                setInfoCourse,
             }}
         >
             {children}
@@ -114,8 +122,9 @@ const getDegree = async (
                 const courses = term.Degree_Term_Course.map((course: {term: string, course: string}) => {
                     // const courses = (coursesMap.get(course.term) || []).concat(course.course);
                     // @ts-ignore
-    
-                    used[course.course] = defaultTerms[term.name];
+                    
+                    used[course.course] = defaultTerms[term.name] - 1;
+                    
                     return course.course;
                 });
                 coursesMap.set(term.id, Array.from(new Set(courses)));
@@ -132,6 +141,7 @@ const getDegree = async (
 
 const getCourses = async (
     id: string,
+    degreeId: string,
     setNodes: React.Dispatch<React.SetStateAction<Node[]>>,
     setEdges: React.Dispatch<React.SetStateAction<Edge[]>>,
     setColors: React.Dispatch<React.SetStateAction<{[key: string]: string}>>,
@@ -143,12 +153,19 @@ const getCourses = async (
         .select(`
             *,
             Major_Course (
-                *
+                *,
+                Course (
+                    name,
+                    Major_Course_Selected (
+                        *
+                    )
+                )
             )
         `)
-        .eq("name", id);
+        .eq("name", id)
+        .eq("Major_Course.Course.Major_Course_Selected.degree", degreeId);
     
-    const parents: { [key: string]: string[]} = {};
+    const parents: { [key: string]: { course: string, name: string, selected: boolean }[]} = {};
     const added = new Map<string, boolean>();
     const groups = new Map<string, { color: string; group: number }>();
     const coord = new Map<string, { x: number; y: number }>();
@@ -169,7 +186,17 @@ const getCourses = async (
                 added.set(majorCourse.parent!, true);
                 parents[majorCourse.parent!] = [];
             }
-            parents[majorCourse.parent!].push(majorCourse.course);
+            let selected = false, name = "";
+            if(
+                majorCourse.Course !== null &&
+                !Array.isArray(majorCourse.Course) &&
+                majorCourse.Course.Major_Course_Selected !== null &&
+                !Array.isArray(majorCourse.Course.Major_Course_Selected)
+            ) {
+                selected = true;
+                name = majorCourse.Course.name;
+            }
+            parents[majorCourse.parent!].push({course: majorCourse.course, name, selected});
             return undefined;
             // return {
             //     id: majorCourse.course,
@@ -194,7 +221,7 @@ const getCourses = async (
             type: "courseNode",
             data: {
                 code: majorCourse.course,
-                // name: majorCourse.name,
+                name: majorCourse.Course && !Array.isArray(majorCourse.Course) ? majorCourse.Course.name : "",
                 background: majorCourse.color,
             },
             position: {
@@ -214,17 +241,18 @@ const getCourses = async (
             data: {
                 code: par in abreviations ? abreviations[par] : par,
                 // name: majorCourse.name,
-                background: colors[parents[par][0]],
+                background: colors[parents[par][0].course],
                 children: parents[par],
             },
             position: {
-                x: coord.get(parents[par][0])!.x * 100,
-                y: (coord.get(parents[par][0])!.x % 2 !== 0
-                    ? coord.get(parents[par][0])!.y
-                    : coord.get(parents[par][0])!.y + 2)* 75,
+                x: coord.get(parents[par][0].course)!.x * 100,
+                y: (coord.get(parents[par][0].course)!.x % 2 !== 0
+                    ? coord.get(parents[par][0].course)!.y
+                    : coord.get(parents[par][0].course)!.y + 2)* 75,
             },
         };
     });
+    
     setNodes([...parentNodes, ...nodes_pre]);
     
     const { data: data2, error: error2 } = await supabase

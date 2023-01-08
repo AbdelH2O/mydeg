@@ -1,9 +1,8 @@
 import { useDraggable } from "@dnd-kit/core";
 import React, { FC, memo } from "react";
 import { Handle, NodeProps, Position, WrapNodeProps } from "reactflow";
-import { CSS } from "@dnd-kit/utilities";
-import { CustomNode } from "../types";
 import { useCourses } from "../hooks/useCourses";
+import { SIDEBAR } from "../types/SideBar";
 
 const CourseNode: FC<NodeProps> = ({ data, dragHandle }) => {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
@@ -14,18 +13,25 @@ const CourseNode: FC<NodeProps> = ({ data, dragHandle }) => {
         ? {
             //   transform: CSS.Translate.toString(transform),
             opacity: 0.5,
-          }
+        }
         : undefined;
 
-    const { used, req } = useCourses();
+    const { used, infoCourse, setInfoCourse, sideBar, setSideBar, req } = useCourses();
 
+    const atrr = sideBar === SIDEBAR.COURSES ? { ...attributes, ...listeners } : {};
     const unlocked = req[data.code] === undefined || req[data.code].every((r) => used[r] !== undefined);
+
+    const handleClick: React.MouseEventHandler<HTMLDivElement> = (e) => {        
+        if(sideBar !== SIDEBAR.INFO) setSideBar(SIDEBAR.INFO);
+        if(infoCourse.id !== data.code) setInfoCourse({ id: data.code, name: data.name });
+        listeners && listeners.onKeyDown(e);
+    };
     
     return (
         <div
-            ref={!used.hasOwnProperty(data.code) && unlocked ? setNodeRef : undefined}
-            {...listeners}
-            {...attributes}
+            ref={!used.hasOwnProperty(data.code) && unlocked && sideBar === SIDEBAR.COURSES ? setNodeRef : undefined}
+            {...atrr}
+            onClick={handleClick}
             className="px-4 py-2 border-2 border-black rounded"
             style={{
                 ...style,

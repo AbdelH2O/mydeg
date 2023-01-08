@@ -1,24 +1,28 @@
 import { createContext, useContext } from "react";
 import { Edge, Node } from "reactflow";
-import { Course } from "../types";
+import { SIDEBAR } from "../types/SideBar";
 
 const DEFAULT_CONTEXT: {
     map: Map<string, string[]>;
-    setMap: (map: Map<string, string[]>) => void;
+    setMap: React.Dispatch<React.SetStateAction<Map<string, string[]>>>;
     major: string;
     minor: string;
     nodes: Node[];
     edges: Edge[];
     loading: boolean;
     terms: {[key: string]: string};
-    setTerms: (terms: {[key: string]: string}) => void;
+    setTerms: React.Dispatch<React.SetStateAction<{[key: string]: string}>>;
     colors: {[key: string]: string};
     activeId: string;
-    setActiveId: (id: string) => void;
+    setActiveId: React.Dispatch<React.SetStateAction<string>>;
     used: {[key: string]: number};
-    setUsed: (used: {[key: string]: number}) => void;
+    setUsed: React.Dispatch<React.SetStateAction<{[key: string]: number}>>;
     req: {[key: string]: string[]};
-    setReq: (req: {[key: string]: string[]}) => void;
+    setReq: React.Dispatch<React.SetStateAction<{[key: string]: string[]}>>;
+    sideBar: SIDEBAR;
+    setSideBar: React.Dispatch<React.SetStateAction<SIDEBAR>>;
+    infoCourse: {id: string, name: string, children?: {course: string, name: string, selected: boolean}[]};
+    setInfoCourse: React.Dispatch<React.SetStateAction<{id: string, name: string, children?: {course: string, name: string, selected: boolean}[]}>>;
 } = {
     map: new Map(),
     setMap: () => {},
@@ -36,8 +40,12 @@ const DEFAULT_CONTEXT: {
     setUsed: () => {},
     req: {},
     setReq: () => {},
+    sideBar: SIDEBAR.NONE,
+    setSideBar: () => {},
+    infoCourse: {id: '', name: ''},
+    setInfoCourse: () => {},
 };
-  
+
 export const CoursesContext = createContext(DEFAULT_CONTEXT);
 
 export function useCourses() {
