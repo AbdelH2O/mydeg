@@ -112,7 +112,7 @@ const SideBar = ({
 
             {/* </div> */}
             <div
-                className="h-full border border-cyan-800 absolute z-[9999] resize-x"
+                className="h-full border-0 border-cyan-800 absolute z-[9999] resize-x"
                 style={{
                     right: show ? "75vw" : "98.5vw",
                     transition: "all 0.3s ease-in-out",
@@ -126,7 +126,7 @@ const SideBar = ({
                 }}
             ></div>
             <div
-                className={`bg-white h-[calc(100vh-4rem)] left-0 fixed z-50`}
+                className={`bg-neutral-800 h-[calc(100vh-4rem)] left-0 fixed z-50`}
                 style={{
                     width: "25vw",
                     marginLeft: show ? "0" : "-23.5vw",
@@ -321,7 +321,7 @@ const SideBar = ({
             {/* <div className="h-full border border-neutral-300 absolute left-[2vw] z-50 cursor-ew-resize hover:brightness-105 hover:"></div> */}
             <div className="group h-fit w-screen">
                 <div
-                    className="w-[25vw] h-[calc(100vh-4rem)] bg-white z-[99] absolute peer cursor-pointer"
+                    className="w-[25vw] h-[calc(100vh-4rem)] bg-neutral-800 z-[99] absolute peer cursor-pointer"
                     style={{
                         display: !display ? "block" : "none",
                         marginLeft: show ? "0" : "-23.5vw",
@@ -329,7 +329,7 @@ const SideBar = ({
                     onClick={handleClose}
                 ></div>
                 <div
-                    className={`z-[9999] group-hover:bg-cyan-500 peer-hover:bg-cyan-500 top-1/2 absolute translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full shadow-xl bg-white cursor-pointer `}
+                    className={`z-[9999] group-hover:bg-cyan-500 peer-hover:bg-cyan-500 top-1/2 absolute translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full border-[0.3px] border-neutral-700 shadow-xl bg-neutral-800 cursor-pointer `}
                     style={{
                         right: show ? "75vw" : "98.5vw",
                         transition:
@@ -343,7 +343,7 @@ const SideBar = ({
                     // onMouseLeave={() => setHovering(false)}
                 >
                     <svg
-                        className="group-hover:fill-white peer-hover:fill-white fill-black"
+                        className="group-hover:fill-black peer-hover:fill-black fill-white"
                         fill={!hovering ? "black" : "white"}
                         // onMouseEnter={() => setHovering(true)} onMouseLeave={() => setHovering(false)}
                         style={{

@@ -172,7 +172,7 @@ const Degree = () => {
                             style={{
                                 // background: '#cffafe',
                                 // background: "#ecfeff",
-                                background: "white",
+                                background: "#1c1c1c",
                                 // background: "black",
                                 overflow: "hidden",
                                 position: "fixed",
@@ -187,13 +187,16 @@ const Degree = () => {
                             }}
                             edgeTypes={edgeTypes}
                         >
-                            <Background color="#000" />
+                            <Background color="#06b6d4" />
                             {/* <Background color="white" /> */}
-                            <MiniMap
+                            {/* <MiniMap
                                 nodeColor={(node) => node.data.background}
                                 zoomable
                                 pannable
-                            />
+                                style={{
+                                    background: "#171717",
+                                }}
+                            /> */}
                             <Controls />
                         </ReactFlow>
                     </div>

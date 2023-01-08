@@ -7,7 +7,7 @@ const Top = () => {
         // <div className="text-white text-2xl absolute top-0 h-16 bg-cyan-700 brightness-110 w-full border-b-2 border-sky-300/20 shadow-lg z-20 grid grid-cols-3 grid-rows-1">
         // <div className="text-white text-2xl absolute top-0 h-16 bg-blue-800 brightness-110 w-full border-b-2 border-sky-300/20 shadow-lg z-20 flex justify-between">
         // <div className="text-white text-2xl absolute top-0 h-16 bg-slate-900 brightness-110 w-full border-b-2 border-sky-300/20 shadow-lg z-20 flex justify-between">
-        <div className="text-white text-2xl absolute top-0 h-16 bg-gray-900 brightness-110 w-full border-b-2 border-sky-300/20 shadow-lg z-20 flex justify-between">
+        <div className="text-white text-2xl absolute top-0 h-16 bg-neutral-900 brightness-110 w-full border-b border-neutral-800 shadow-xl z-20 flex justify-between">
             {/* <div className="px-4 py-2 rounded ml-2 flex justify-start items-center">
                 <div className="select-none cursor-pointer">
                     <span className="pr-[0.125rem] font- text-2xl font-Raleway">
