@@ -49,7 +49,7 @@ const CourseNode: FC<NodeProps> = ({ data, dragHandle }) => {
                         // boxShadow: `-3px 5px #000`,
                         backgroundColor: used.hasOwnProperty(data.code)
                             ? "#15803d"
-                            : "#232323",
+                            : "#27272a",
                         // backgroundColor: used.hasOwnProperty(data.code)
                         //     ? data.background
                         //     : unlocked
