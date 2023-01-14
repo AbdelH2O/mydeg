@@ -63,9 +63,11 @@ const Testi = () => {
                 </div>
             </div>
             <div
-                className="absolute select-none z-0 top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2 text-blue-600 font-JetBrainsMono text-9xl"
+                className="absolute flex justify-center w-full select-none z-0 top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2 text-blue-600 font-JetBrainsMono text-9xl"
             >
-                Git Gud
+                <p>
+                    Git Gud
+                </p>
             </div>
         </div>
     );
