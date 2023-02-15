@@ -1,15 +1,21 @@
 import Image from "next/image";
 import { useCourses } from "../hooks/useCourses";
+import Link from "next/link";
 
 const Top = () => {
-    const { minor, major } = useCourses();
+    const {majorMinor } = useCourses();
     return (
-        <div className="text-white text-2xl absolute top-0 h-16 bg-cyan-700 brightness-110 w-full border-b-2 border-sky-300/20 shadow-lg z-20 grid grid-cols-3 grid-rows-1">
+        <div className="text-white text-2xl absolute top-0 h-16 bg-cyan-700 brightness-110 w-full border-b border-sky-300/20 shadow-lg z-20 grid grid-cols-3 grid-rows-1">
             <div className="px-4 py-2 rounded ml-2 flex justify-start items-center">
-                <div className="select-none cursor-pointer">
-                    <span className="pr-[0.125rem] font- text-2xl font-Raleway">my</span>
-                    <span className="text-white bg-black p-1 px-2 rounded font-bold font-JetBrainsMono">Degree</span>
-                </div>
+                <Link 
+                    href="/dashboard"
+                    passHref
+                >
+                    <div className="select-none cursor-pointer">
+                        <span className="pr-[0.125rem] font- text-2xl font-Raleway">my</span>
+                        <span className="text-white bg-black p-1 px-2 rounded font-bold font-JetBrainsMono">Degree</span>
+                    </div>
+                </Link>
             </div>
             <div className="w-full flex justify-center items-center">
                 <div className="flex flex-row justify-center items-center select-none max-w-xs">
@@ -17,7 +23,7 @@ const Top = () => {
                         <p
                             className="font-JetBrainsMono font-extrabold px-4 py-2 rounded text-2xl text-cyan-900"
                         >
-                            {major}
+                            {majorMinor.major}
                         </p>
                     </div>
                     <p className="font-extrabold mx-5">
@@ -27,7 +33,7 @@ const Top = () => {
                         <p
                             className="font-JetBrainsMono font-extrabold px-4 py-2 rounded text-2xl text-yellow-500"
                         >
-                            {minor}
+                            {majorMinor.minor.split("/")[1]}
                         </p>
                     </div>
                 </div>

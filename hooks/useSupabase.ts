@@ -18,7 +18,7 @@ const useSupabase = () => {
     }
 
     const token = account.idToken;
-    console.log(token);
+    // console.log(token);
     
     supabase.auth.setSession({ access_token: token ? token : "", refresh_token: ""});
 

@@ -50,7 +50,7 @@ const AuthProvider = ({ children }: { children: JSX.Element[] | JSX.Element}) =>
             }
             return;
         } else if(!account) {
-            router.push("/login");
+            // router.push("/login");
             return;
         }
     }, [router.route]);

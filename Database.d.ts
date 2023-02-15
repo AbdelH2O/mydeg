@@ -12,260 +12,321 @@ export interface Database {
       Course: {
         Row: {
           code: string
-          name: string
           credits: number
+          name: string
           prerequisites_misc: string[]
         }
         Insert: {
           code: string
-          name: string
           credits: number
+          name: string
           prerequisites_misc?: string[]
         }
         Update: {
           code?: string
-          name?: string
           credits?: number
+          name?: string
           prerequisites_misc?: string[]
         }
       }
       Course_Course: {
         Row: {
-          id: number
           course: string
+          group: number
+          id: number
           requisite: string
           type: string
-          group: number
         }
         Insert: {
-          id?: number
           course: string
+          group?: number
+          id?: number
           requisite: string
           type?: string
-          group?: number
         }
         Update: {
-          id?: number
           course?: string
+          group?: number
+          id?: number
           requisite?: string
           type?: string
-          group?: number
         }
       }
       Degree: {
         Row: {
-          id: string
-          major: string
-          minor: string
+          access: string[]
           created_at: string
           created_by: string
-          access: string[]
+          id: string
           last_change: string
-        }
-        Insert: {
-          id?: string
           major: string
           minor: string
+          special: string | null
+          start: number
+          year: string
+        }
+        Insert: {
+          access?: string[]
           created_at?: string
           created_by: string
-          access?: string[]
+          id?: string
           last_change?: string
+          major: string
+          minor: string
+          special?: string | null
+          start?: number
+          year?: string
         }
         Update: {
-          id?: string
-          major?: string
-          minor?: string
+          access?: string[]
           created_at?: string
           created_by?: string
-          access?: string[]
+          id?: string
           last_change?: string
+          major?: string
+          minor?: string
+          special?: string | null
+          start?: number
+          year?: string
         }
       }
       Degree_Term: {
         Row: {
-          id: string
-          name: string
           created_at: string
           degree: string
+          id: string
           type: string
+          year: string
         }
         Insert: {
-          id?: string
-          name: string
           created_at?: string
           degree: string
+          id?: string
           type?: string
+          year: string
         }
         Update: {
-          id?: string
-          name?: string
           created_at?: string
           degree?: string
+          id?: string
           type?: string
+          year?: string
         }
       }
       Degree_Term_Course: {
         Row: {
+          course: string
           id: number
           term: string
-          course: string
         }
         Insert: {
+          course: string
           id?: number
           term: string
-          course: string
         }
         Update: {
+          course?: string
           id?: number
           term?: string
-          course?: string
         }
       }
       Major_Course: {
         Row: {
-          id: number
-          major: string
+          color: string
           course: string
           group: number
+          id: number
+          major: string
           parent: string | null
-          color: string
           x: number
           y: number
         }
         Insert: {
-          id?: number
-          major: string
+          color?: string
           course: string
           group?: number
+          id?: number
+          major: string
           parent?: string | null
-          color?: string
           x?: number
           y?: number
         }
         Update: {
-          id?: number
-          major?: string
+          color?: string
           course?: string
           group?: number
+          id?: number
+          major?: string
           parent?: string | null
-          color?: string
           x?: number
           y?: number
         }
       }
+      Major_Course_GE: {
+        Row: {
+          color: string | null
+          course: string | null
+          group: string | null
+          id: number
+          major: string | null
+          parent: string | null
+          x: string | null
+          y: string | null
+        }
+        Insert: {
+          color?: string | null
+          course?: string | null
+          group?: string | null
+          id?: number
+          major?: string | null
+          parent?: string | null
+          x?: string | null
+          y?: string | null
+        }
+        Update: {
+          color?: string | null
+          course?: string | null
+          group?: string | null
+          id?: number
+          major?: string | null
+          parent?: string | null
+          x?: string | null
+          y?: string | null
+        }
+      }
+      Major_Course_Selected: {
+        Row: {
+          course: string
+          degree: string
+          id: number
+          parent: string
+        }
+        Insert: {
+          course: string
+          degree: string
+          id?: number
+          parent: string
+        }
+        Update: {
+          course?: string
+          degree?: string
+          id?: number
+          parent?: string
+        }
+      }
       Majors: {
         Row: {
-          name: string
           catalog: string
+          name: string
           type: string
         }
         Insert: {
-          name: string
           catalog: string
+          name: string
           type?: string
         }
         Update: {
-          name?: string
           catalog?: string
+          name?: string
           type?: string
         }
       }
       Professor: {
         Row: {
+          keywords: string[]
           name: string
           rating: number
-          keywords: string[]
         }
         Insert: {
+          keywords: string[]
           name: string
           rating?: number
-          keywords: string[]
         }
         Update: {
+          keywords?: string[]
           name?: string
           rating?: number
-          keywords?: string[]
         }
       }
       Section: {
         Row: {
-          id: string
-          professor: string
           course: string
           days: string
-          start_time: string
           end_time: string
-          term: string
+          id: string
+          professor: string
           raw_schedule: string
+          start_time: string
+          term: string
         }
         Insert: {
-          id?: string
-          professor?: string
           course?: string
           days?: string
-          start_time?: string
           end_time?: string
-          term?: string
+          id?: string
+          professor?: string
           raw_schedule?: string
+          start_time?: string
+          term?: string
         }
         Update: {
-          id?: string
-          professor?: string
           course?: string
           days?: string
-          start_time?: string
           end_time?: string
-          term?: string
+          id?: string
+          professor?: string
           raw_schedule?: string
+          start_time?: string
+          term?: string
         }
       }
       Single_Term: {
         Row: {
-          id: string
-          major: string
-          minor: string | null
+          access: string[]
           created_at: string | null
           created_by: string
-          access: string[]
+          id: string
           last_change: string
+          major: string
+          minor: string | null
           term: string
         }
         Insert: {
-          id?: string
-          major: string
-          minor?: string | null
+          access?: string[]
           created_at?: string | null
           created_by: string
-          access?: string[]
+          id?: string
           last_change?: string
+          major: string
+          minor?: string | null
           term: string
         }
         Update: {
-          id?: string
-          major?: string
-          minor?: string | null
+          access?: string[]
           created_at?: string | null
           created_by?: string
-          access?: string[]
+          id?: string
           last_change?: string
+          major?: string
+          minor?: string | null
           term?: string
         }
       }
       Single_Term_Section: {
         Row: {
           id: number
-          term: string
           section: string
+          term: string
         }
         Insert: {
           id?: number
-          term: string
           section: string
+          term: string
         }
         Update: {
           id?: number
-          term?: string
           section?: string
+          term?: string
         }
       }
     }
