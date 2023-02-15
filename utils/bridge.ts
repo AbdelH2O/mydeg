@@ -28,7 +28,7 @@ export const addCourse = async (term: string, course: string, supabase: Supabase
     };
 }
 
-export const addTerm = async (degree: string, name: string, supabase: SupabaseClient<Database>) => {
+export const addTerm = async (degree: string, year: string, type: string, supabase: SupabaseClient<Database>) => {
     // const id = uuid();
     NProgress.set(0.3);
     NProgress.start();
@@ -36,7 +36,8 @@ export const addTerm = async (degree: string, name: string, supabase: SupabaseCl
         .from("Degree_Term")
         .insert({
             degree,
-            name,
+            year,
+            type
         })
         .select('id');
     NProgress.done();
@@ -209,4 +210,34 @@ export const getMajors = async (supabase: SupabaseClient<Database>) => {
         success: true,
         data,
     };
+}
+
+export const setSelected = async (supabase: SupabaseClient<Database>, id: string, degree: string, parent: string) => {
+    NProgress.set(0.3);
+    NProgress.start();
+    const { data: data2, error: error2 } = await supabase
+        .from("Major_Course_Selected")
+        .delete()
+        .match({ parent, degree });
+    const { data, error } = await supabase
+        .from("Major_Course_Selected")
+        .insert({
+            course: id,
+            degree,
+            parent,
+        })
+        .select("id");
+    NProgress.done();
+    if (error) {
+        return {
+            error: error.message,
+            success: false,
+            data: null,
+        };
+    }
+    return {
+        error: null,
+        success: true,
+        data,
+    }
 }

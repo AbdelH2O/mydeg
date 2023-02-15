@@ -6,6 +6,7 @@ import { useAuth } from "../../hooks/useAuth";
 import useSupabase from "../../hooks/useSupabase";
 import { getDegrees, getSingleTerms, addDegree } from "../../utils/bridge";
 import { toast } from "react-toastify";
+import Link from "next/link";
 
 const user = {
     name: "Tom Cook",
@@ -463,77 +464,82 @@ const Dashboard = () => {
                                     <>
                                         <div className="mt-5 min-h-fit grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                                             {recent.map((item, index) => (
-                                                <div
-                                                    className="rounded-lg cursor-pointer group"
+                                                <Link
                                                     key={index}
+                                                    href={`/${item.term ? "term" : "degree"}/${item.id}`}
                                                 >
-                                                    <div className="bg-transparent text-white group-hover:shadow-2xl text-center font-Poppins font-semibold flex justify-start">
-                                                        <p
-                                                            className="w-fit p-2 px-3 rounded-t ml-2 shadow"
-                                                            style={{
-                                                                backgroundColor:
-                                                                    item.term
-                                                                        ? "#164e63"
-                                                                        : "#000",
-                                                                color: item.term
-                                                                    ? "#cffafe"
-                                                                    : "#fff",
-                                                            }}
-                                                        >
-                                                            {item.term
-                                                                ? item.term
-                                                                : "Degree"}
-                                                        </p>
-                                                    </div>
-                                                    <div className="shadow-lg group-hover:shadow-xl">
-                                                        <div className="p-5 rounded-t bg-cyan-700">
-                                                            <div className="flex items-center">
-                                                                <div className="w-0 flex-1 flex flex-row items-center justify-center text-2xl font-extrabold">
-                                                                    <p className="bg-white p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-cyan-900">
-                                                                        {
-                                                                            item.major
-                                                                        }
-                                                                    </p>
-                                                                    <p className="font-extrabold mx-5 text-white">
-                                                                        /
-                                                                    </p>
-                                                                    <p className="bg-cyan-900 p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-yellow-500">
-                                                                        {
-                                                                            item.minor
-                                                                        }
+                                                    <div
+                                                        className="rounded-lg cursor-pointer group"
+                                                        key={index}
+                                                    >
+                                                        <div className="bg-transparent text-white group-hover:shadow-2xl text-center font-Poppins font-semibold flex justify-start">
+                                                            <p
+                                                                className="w-fit p-2 px-3 rounded-t ml-2 shadow"
+                                                                style={{
+                                                                    backgroundColor:
+                                                                        item.term
+                                                                            ? "#164e63"
+                                                                            : "#000",
+                                                                    color: item.term
+                                                                        ? "#cffafe"
+                                                                        : "#fff",
+                                                                }}
+                                                            >
+                                                                {item.term
+                                                                    ? item.term
+                                                                    : "Degree"}
+                                                            </p>
+                                                        </div>
+                                                        <div className="shadow-lg group-hover:shadow-xl">
+                                                            <div className="p-5 rounded-t bg-cyan-700">
+                                                                <div className="flex items-center">
+                                                                    <div className="w-0 flex-1 flex flex-row items-center justify-center text-2xl font-extrabold">
+                                                                        <p className="bg-white p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-cyan-900">
+                                                                            {
+                                                                                item.major
+                                                                            }
+                                                                        </p>
+                                                                        <p className="font-extrabold mx-5 text-white">
+                                                                            /
+                                                                        </p>
+                                                                        <p className="bg-cyan-900 p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-yellow-500">
+                                                                            {
+                                                                                item.minor.split('/')[1]
+                                                                            }
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="bg-cyan-700 rounded-b border-0 -mt-[0.2px] border-cyan-700 border-t-0">
+                                                                <div className="text-sm rounded-b w-full h-full px-5 py-3 bg-cyan-50">
+                                                                    <p className="text-cyan-700 font-Lato">
+                                                                        <span className="font-extrabold text-cyan-700">
+                                                                            <span
+                                                                                className="text-red-500 font-semibold"
+                                                                                style={{
+                                                                                    color: !item.count
+                                                                                        ? "#ef4444"
+                                                                                        : "#0e7490",
+                                                                                }}
+                                                                            >
+                                                                                {
+                                                                                    item.count
+                                                                                }
+                                                                            </span>{" "}
+                                                                            {"courses" in
+                                                                            item
+                                                                                ? ` / ${item.courses}`
+                                                                                : ""}
+                                                                        </span>{" "}
+                                                                        {}
+                                                                        courses
+                                                                        planned
                                                                     </p>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div className="bg-cyan-700 rounded-b border-0 -mt-[0.2px] border-cyan-700 border-t-0">
-                                                            <div className="text-sm rounded-b w-full h-full px-5 py-3 bg-cyan-50">
-                                                                <p className="text-cyan-700 font-Lato">
-                                                                    <span className="font-extrabold text-cyan-700">
-                                                                        <span
-                                                                            className="text-red-500 font-semibold"
-                                                                            style={{
-                                                                                color: !item.count
-                                                                                    ? "#ef4444"
-                                                                                    : "#0e7490",
-                                                                            }}
-                                                                        >
-                                                                            {
-                                                                                item.count
-                                                                            }
-                                                                        </span>{" "}
-                                                                        {"courses" in
-                                                                        item
-                                                                            ? ` / ${item.courses}`
-                                                                            : ""}
-                                                                    </span>{" "}
-                                                                    {}
-                                                                    courses
-                                                                    planned
-                                                                </p>
-                                                            </div>
-                                                        </div>
                                                     </div>
-                                                </div>
+                                                </Link>
                                             ))}
                                         </div>
                                         {/* View more button */}
@@ -625,56 +631,58 @@ const Dashboard = () => {
                                             console.log(index);
 
                                             return (
-                                                <div
-                                                    className="rounded-lg cursor-pointer group"
-                                                    key={index}
-                                                >
-                                                    <div className="bg-transparent text-white group-hover:shadow-2xl text-center font-Poppins font-semibold flex justify-start">
-                                                        <p className="bg-gray-900 w-fit p-2 px-3 rounded-t ml-2 shadow">
-                                                            Degree
-                                                        </p>
-                                                    </div>
-                                                    <div className="shadow-lg group-hover:shadow-xl">
-                                                        <div className="p-5 rounded-t bg-cyan-700">
-                                                            <div className="flex items-center">
-                                                                <div className="w-0 flex-1 flex flex-row items-center justify-center text-2xl font-extrabold">
-                                                                    <p className="bg-white p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-cyan-900">
-                                                                        {
-                                                                            degree.major
-                                                                        }
-                                                                    </p>
-                                                                    <p className="font-extrabold mx-5 text-white">
-                                                                        /
-                                                                    </p>
-                                                                    <p className="bg-cyan-900 p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-yellow-500">
-                                                                        {
-                                                                            degree.minor
-                                                                        }
+                                                <Link href={`/degree/${degree.id}`} passHref key={index}>
+                                                    <div
+                                                        className="rounded-lg cursor-pointer group"
+                                                        key={index}
+                                                    >
+                                                        <div className="bg-transparent text-white group-hover:shadow-2xl text-center font-Poppins font-semibold flex justify-start">
+                                                            <p className="bg-gray-900 w-fit p-2 px-3 rounded-t ml-2 shadow">
+                                                                Degree
+                                                            </p>
+                                                        </div>
+                                                        <div className="shadow-lg group-hover:shadow-xl">
+                                                            <div className="p-5 rounded-t bg-cyan-700">
+                                                                <div className="flex items-center">
+                                                                    <div className="w-0 flex-1 flex flex-row items-center justify-center text-2xl font-extrabold">
+                                                                        <p className="bg-white p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-cyan-900">
+                                                                            {
+                                                                                degree.major
+                                                                            }
+                                                                        </p>
+                                                                        <p className="font-extrabold mx-5 text-white">
+                                                                            /
+                                                                        </p>
+                                                                        <p className="bg-cyan-900 p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-yellow-500">
+                                                                            {
+                                                                                degree.minor.split('/')[1]
+                                                                            }
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="bg-cyan-700 rounded-b border-0 -mt-[0.2px] border-cyan-700 border-t-0">
+                                                                <div className="text-sm rounded-b w-full h-full px-5 py-3 bg-cyan-50">
+                                                                    <p className="text-cyan-700 font-Lato">
+                                                                        <span className="font-extrabold text-cyan-700">
+                                                                            <span className="text-red-500 font-semibold">
+                                                                                {
+                                                                                    degree.count
+                                                                                }
+                                                                            </span>{" "}
+                                                                            /{" "}
+                                                                            {
+                                                                                degree.courses
+                                                                            }
+                                                                        </span>{" "}
+                                                                        courses
+                                                                        planned
                                                                     </p>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div className="bg-cyan-700 rounded-b border-0 -mt-[0.2px] border-cyan-700 border-t-0">
-                                                            <div className="text-sm rounded-b w-full h-full px-5 py-3 bg-cyan-50">
-                                                                <p className="text-cyan-700 font-Lato">
-                                                                    <span className="font-extrabold text-cyan-700">
-                                                                        <span className="text-red-500 font-semibold">
-                                                                            {
-                                                                                degree.count
-                                                                            }
-                                                                        </span>{" "}
-                                                                        /{" "}
-                                                                        {
-                                                                            degree.courses
-                                                                        }
-                                                                    </span>{" "}
-                                                                    courses
-                                                                    planned
-                                                                </p>
-                                                            </div>
-                                                        </div>
                                                     </div>
-                                                </div>
+                                                </Link>
                                             );
                                         })}
                                     </div>
@@ -738,51 +746,56 @@ const Dashboard = () => {
                                     <div className="mt-5 min-h-fit grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                                         {singles.map((single, index) => {
                                             return (
-                                                <div
-                                                    className="rounded-lg cursor-pointer group"
+                                                <Link
                                                     key={index}
+                                                    href={`/term/${single.id}`}
+                                                    passHref
                                                 >
-                                                    <div className="bg-white text-cyan-100 text-center group-hover:shadow-xl font-Poppins font-semibold flex justify-start">
-                                                        <p className="bg-cyan-900 w-fit p-2 px-3 rounded-t ml-2 shadow">
-                                                            {single.term}
-                                                        </p>
-                                                    </div>
-                                                    <div className="shadow-lg group-hover:shadow-xl">
-                                                        <div className="p-5 rounded-t bg-cyan-700 shadow-md">
-                                                            <div className="flex items-center">
-                                                                <div className="w-0 flex-1 flex flex-row items-center justify-center text-2xl font-extrabold">
-                                                                    <p className="bg-white p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-cyan-900">
-                                                                        {
-                                                                            single.major
-                                                                        }
-                                                                    </p>
-                                                                    <p className="font-extrabold mx-5 text-white">
-                                                                        /
-                                                                    </p>
-                                                                    <p className="bg-cyan-900 p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-yellow-500">
-                                                                        {
-                                                                            single.minor
-                                                                        }
+                                                    <div
+                                                        className="rounded-lg cursor-pointer group"
+                                                    >
+                                                        <div className="bg-white text-cyan-100 text-center group-hover:shadow-xl font-Poppins font-semibold flex justify-start">
+                                                            <p className="bg-cyan-900 w-fit p-2 px-3 rounded-t ml-2 shadow">
+                                                                {single.term}
+                                                            </p>
+                                                        </div>
+                                                        <div className="shadow-lg group-hover:shadow-xl">
+                                                            <div className="p-5 rounded-t bg-cyan-700 shadow-md">
+                                                                <div className="flex items-center">
+                                                                    <div className="w-0 flex-1 flex flex-row items-center justify-center text-2xl font-extrabold">
+                                                                        <p className="bg-white p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-cyan-900">
+                                                                            {
+                                                                                single.major
+                                                                            }
+                                                                        </p>
+                                                                        <p className="font-extrabold mx-5 text-white">
+                                                                            /
+                                                                        </p>
+                                                                        <p className="bg-cyan-900 p-2 px-4 font-bold font-JetBrainsMono w-fit rounded text-yellow-500">
+                                                                            {
+                                                                                single.minor.split('/')[1]
+                                                                            }
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="bg-cyan-700 rounded-b border-0 -mt-[0.2px] border-cyan-700 border-t-0">
+                                                                <div className="text-sm w-full h-full px-5 py-3 bg-cyan-50 rounded-b">
+                                                                    <p className="text-cyan-700">
+                                                                        <span className="font-bold text-gray-900">
+                                                                            <span className="text-cyan-700 font-extrabold">
+                                                                                {
+                                                                                    single.count
+                                                                                }
+                                                                            </span>
+                                                                        </span>{" "}
+                                                                        courses
                                                                     </p>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div className="bg-cyan-700 rounded-b border-0 -mt-[0.2px] border-cyan-700 border-t-0">
-                                                            <div className="text-sm w-full h-full px-5 py-3 bg-cyan-50 rounded-b">
-                                                                <p className="text-cyan-700">
-                                                                    <span className="font-bold text-gray-900">
-                                                                        <span className="text-cyan-700 font-extrabold">
-                                                                            {
-                                                                                single.count
-                                                                            }
-                                                                        </span>
-                                                                    </span>{" "}
-                                                                    courses
-                                                                </p>
-                                                            </div>
-                                                        </div>
                                                     </div>
-                                                </div>
+                                                </Link>
                                             );
                                         })}
                                     </div>

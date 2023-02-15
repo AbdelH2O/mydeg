@@ -1,12 +1,10 @@
-import { CoursesProvider, AuthProvider } from "./provider";
+import { AuthProvider } from "./provider";
 
 const Providers = ({ children }: { children: JSX.Element|JSX.Element[]}) => {
     return (
-        <CoursesProvider>
-            <AuthProvider>
-                {children}
-            </AuthProvider>
-        </CoursesProvider>
+        <AuthProvider>
+            {children}
+        </AuthProvider>
     );
 };
 export default Providers;
