@@ -47,7 +47,7 @@ const TermHandler = ({
     const handleAddTerm = async (termType: string, termYear: string) => {
         const term = Object.keys(terms).length === 0 ?
             {
-                type: majorMinor.term.type % 2 === 0 ? "Fall" : "Spring",
+                type: majorMinor.term.type,
                 year: majorMinor.term.year
             } :
             {
@@ -380,7 +380,7 @@ const SideBar = (
                                                                 return (
                                                                     <Fragment key={term+'empty'+index}>
                                                                         <Droppable
-                                                                            index={index}
+                                                                            // index={index}
                                                                             id={term + 'empty' + index}
                                                                             className="border border-dashed border-gray-300 rounded flex justify-center items-center bg-gray-100"
                                                                             // style={{
@@ -393,7 +393,7 @@ const SideBar = (
                                                             ( map.get(term)!.length === 6 && 
                                                                 <Fragment key={term+'empty7'}>
                                                                     <Droppable
-                                                                        index={7}
+                                                                        // index={7}
                                                                         id={term + 'empty7'}
                                                                         className="border border-dashed w-[144px] mx-auto col-span-2 h-[75px] border-gray-300 rounded flex justify-center items-center bg-gray-100"
                                                                         // style={{
