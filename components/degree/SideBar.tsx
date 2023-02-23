@@ -1,10 +1,15 @@
-import { MouseEventHandler, useEffect, useState } from "react";
+import { Fragment, MouseEventHandler, useEffect, useState } from "react";
 import { useCourses } from "../../hooks/useCourses";
 import { SIDEBAR } from "../../types/SideBar";
 import { TERMS } from "../../types/Terms";
 import Droppable from "../Droppable";
 import { removeCourse } from "../../utils/bridge";
 import useSupabase from "../../hooks/useSupabase";
+import { Dialog, Transition } from "@headlessui/react";
+import { LeafIcon, SnowIcon, SunIcon } from "../icons";
+import { toast } from "react-toastify";
+import { addTerm } from "../../utils/bridge";
+import { useRouter } from "next/router";
 
 const map: {[key: string]: string} = {
     Fall: 'FA',
@@ -42,12 +47,16 @@ const SideBar = ({
 }) => {
     const [hovering, setHovering] = useState(false);
     const [display, setDisplay] = useState(false);
+    // Adding term dialog
+    const [isOpen, setIsOpen] = useState(true);
 
+    const { id } = useRouter().query;
     const { supabase } = useSupabase();
 
     const {
         sideBar,
         setSideBar,
+        majorMinor,
         terms,
         currentTerm,
         activeId,
@@ -96,9 +105,160 @@ const SideBar = ({
         setMap(coursesMap);
         setTerms({...terms});
     }
+
+    const closeModal = () => {
+        setIsOpen(false);
+    }
+
+    const openModal = () => {
+        setIsOpen(true);
+    }
+
+    const getNextTerm = (type: string, year: string) => {
+        const yearPlus = (parseInt(year) + 1).toString();
+        if(type === "Fall" && Object.values(terms).every(t => t.type !== "Spring" || t.year !== yearPlus)) {
+            return [{type: "Spring", year: yearPlus}];
+        }
+        if(type === "Spring") {
+            const ret = [];
+            if(Object.values(terms).every(t => t.type !== "Fall" || t.year !== year)) {
+                ret.push({type: "Fall", year});
+            }
+            if(Object.values(terms).every(t => t.type !== "Summer" || t.year !== year)) {
+                ret.push({type: "Summer", year});
+            }
+            return ret;
+        }
+        return [];
+    }
+
+    const handleAddTerm = async (termType: string, termYear: string) => {
+        closeModal();
+        const term = Object.keys(terms).length === 0 ?
+            {
+                type: majorMinor.term.type,
+                year: majorMinor.term.year
+            } :
+            {
+                type: termType,
+                year: termYear
+            };
+        const { id: termId, success } = await addTerm(id as string, term.year, term.type, supabase);
+        if(success) {
+            coursesMap.set(termId as string, []);
+            setMap(coursesMap);
+            const temp = {...terms, [termId as string]: term};
+            setTerms(
+                Object.keys(temp)
+                    .sort((a,b) => {
+                        if(temp[a].year === temp[b].year) {
+                            const order = ["Spring", "Summer", "Fall"];
+                            return order.indexOf(temp[a].type) - order.indexOf(temp[b].type);
+                        }
+                        return parseInt(temp[a].year) - parseInt(temp[b].year)
+                    })
+                    .reduce((r: {[key: string]: { type: string, year: string }},k)=>(r[k]=temp[k],r),{})
+            );
+            
+        } else {
+            toast.error("Error adding term. Please try again later.");
+        }
+    }
     
     return (
         <div className="h-[calc(100vh-4rem)] absolute">
+            <Transition appear show={isOpen} as={Fragment}>
+                <Dialog as="div" className="relative z-[999999]" onClose={closeModal}>
+                    <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black bg-opacity-25" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4 text-center">
+                        <Transition.Child
+                            as={Fragment}
+                            enter="ease-out duration-300"
+                            enterFrom="opacity-0 scale-95"
+                            enterTo="opacity-100 scale-100"
+                            leave="ease-in duration-200"
+                            leaveFrom="opacity-100 scale-100"
+                            leaveTo="opacity-0 scale-95"
+                        >
+                            <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-xl bg-cyan-50 pb-10 text-left align-middle shadow-xl transition-all">
+                                <Dialog.Title
+                                    as="h3"
+                                    className="text-2xl w-full font-med ium leading-6 text-white bg-cyan-700 p-4 font-Poppins font-bold"
+                                >
+                                    Add term
+                                </Dialog.Title>
+                                <div className="mt-6 grid grid-cols-2 gap-2 px-10">
+                                    {
+                                        Object.keys(terms).map((termId, index) => {
+                                            const next = getNextTerm(terms[termId].type, terms[termId].year);
+                                            return (
+                                                <Fragment
+                                                    key={index}
+                                                >
+                                                    {
+                                                        next.map((term, index) => (
+                                                            <div
+                                                                key={index}
+                                                                className="flex items-center justify-center p-2 py-3 font-Lato font-bold border bg-gre en-50 rounded cursor-pointer shadow hover:shadow-md transition-shadow"
+                                                                onClick={() => handleAddTerm(term.type, term.year)}
+                                                                style={{
+                                                                    backgroundColor: term.type === "Fall" ? "rgb(239 246 255)" : term.type !== "Spring" ? "rgb(254 252 232)" : "rgb(240 253 244)",
+                                                                }}
+                                                            >
+                                                                <div className="flex items-center flex-col justify-center content-center">
+                                                                    <div>
+                                                                        {
+                                                                            term.type === "Fall" ?
+                                                                                <SnowIcon height={35} width={35} className={"fill-blue-500 mx-4 ml-2"}/> :
+                                                                                term.type !== "Spring" ?
+                                                                                    <SunIcon height={25} width={25} className={"mx-4 ml-1"}/> :
+                                                                                    <LeafIcon height={25} width={25} className="fill-green-500 mx-4 ml-2"/>
+                                                                        }
+                                                                    </div>
+                                                                    <p 
+                                                                        style={{
+                                                                            color: term.type === "Fall" ? "rgb(30 58 138)" : term.type !== "Spring" ? "rgb(113 63 18)" : "rgb(20 83 45)",
+                                                                        }}
+                                                                    >
+                                                                        {term.type} {term.year}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        ))
+                                                    }
+                                                </Fragment>
+                                            )
+                                        })
+                                    }
+                                </div>
+{/* 
+                                <div className="mt-4">
+                                    <button
+                                    type="button"
+                                    className="inline-flex justify-center rounded border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                    onClick={closeModal}
+                                    >
+                                    Add
+                                    </button>
+                                </div> */}
+                            </Dialog.Panel>
+                        </Transition.Child>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
             <div 
                 className="h-full border border-sky-300/50 absolute z-[9999] resize-x"
                 style={{right: show ? '75vw' : '98.5vw', transition: 'all 0.3s ease-in-out', cursor: show ? 'ew-resize' : 'auto'}}
@@ -127,7 +287,7 @@ const SideBar = ({
                     }
                     <div className="h-14 w-full flex flex-col justify-center items-center">
                         {/* Plus sign to add terms */}
-                        <p className="font-Poppins text-xl font-extrabold text-center w-[90%] h-[90%] bg-cyan-900 hover:brightness-90 rounded flex flex-col justify-center cursor-pointer select-none">
+                        <p onClick={openModal} className="font-Poppins text-xl font-extrabold text-center w-[90%] h-[90%] bg-cyan-900 hover:brightness-90 rounded flex flex-col justify-center cursor-pointer select-none">
                             +
                         </p>
                     </div>
@@ -140,7 +300,7 @@ const SideBar = ({
                     // }}
                 >
                     <div className="w-full">
-                        <div className="w-full mx-auto pb-2 h-20 bg-cyan-800 bor der border-cyan-70 0 flex flex-col justify-center items-center round ed font-bold font-Poppins text-2xl">
+                        <div className="w-full mx-auto pb-2 h-20 bg-cyan-800 border-0 border-cyan-70 0 flex flex-col justify-center items-center round ed font-bold font-Poppins text-2xl">
                             <p>
                                 {currentTerm.type + " " + currentTerm.year}
                             </p>
@@ -154,15 +314,15 @@ const SideBar = ({
                             </div>
                         </div>
                     </div>
-                    <div className="bg-cyan-800 w-full h-2">
-                        <div className="bg-white rounded-t h-full">
+                    <div className="bg-cyan-800 w-full h-1 -z-10">
+                        <div className="bg-white rounded-tl h-2">
                             {/* Total credits: {coursesMap.get(currentTerm.id)?.reduce((acc, course) => acc + info[course]?.credits, 0)} */}
                         </div>
                     </div>
                     {/* <div className="bg-cyan-800 rounded-b ml-auto mr-2 w-fit px-2 font-Lato py-1 font-bold">
                         Total credits: {coursesMap.get(currentTerm.id)?.reduce((acc, course) => acc + info[course]?.credits, 0)}
                     </div> */}
-                    <div className="w-full overflow-y-scroll h-[calc(100vh-9.5rem)] rounded">
+                    <div className="w-full overflow-y-scroll h-[calc(100vh-9.2rem)] rounded">
                         <div className="bg-blue-600 hidden"/>
                         <div className="bg-green-600 hidden"/>
                         <div className="bg-red-600 hidden"/>
@@ -204,16 +364,20 @@ const SideBar = ({
                                     </div>
                                 );
                             })) : (
-                                <div className="w-full h-64 p-2 absolute bottom-0 mt-4 left-0 transition-all duration-300 ease-in-out" style={{height: activeId ? '16rem' : '0', bottom: activeId ? '0' : '-13rem',}}>
-                                    {/* Display to the user: No courses added yet :( */}
-                                    <div className="border h-full border-dashed border-gray-300 bg-cyan-100/95 rounded flex justify-center items-center">
-                                        <p className="text-black font-bold font-Poppins text-2xl">
-                                            No courses added yet :(
-                                        </p>
-                                    </div>
+                                <div className="h-full">
+                                    {/* Display to the user: No courses added yet :( instead of displaying the courses */}
+                                    <p className="text-black font-Lato text-center my-auto">
+                                        No courses added yet <br/>:(
+                                    </p>
                                 </div>
                             )
                         }
+                    </div>
+                    <div className="bg-cyan-800 w-full h- 10 absolute bottom-0">
+                        <div className="bg-wh ite rounded-bl h- 1">
+                            <div className="h-full bg-transparent"/>
+                            {/* Total credits: {coursesMap.get(currentTerm.id)?.reduce((acc, course) => acc + info[course]?.credits, 0)} */}
+                        </div>
                     </div>
                     <div
                         className="w-full h-64 p-2 absolute bottom-0 mt-4 left-0 transition-all duration-300 ease-in-out"

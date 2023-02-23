@@ -4,6 +4,8 @@ import { Handle, NodeProps, Position, WrapNodeProps } from "reactflow";
 import { useCourses } from "../../../hooks/useCourses";
 import { SIDEBAR } from "../../../types/SideBar";
 import { abreviations } from "../../../enums/abr";
+import checkIndex, { matchIndex } from "../../../utils/util";
+import { CheckIcon } from "../../icons";
 
 const SelectorNode: FC<NodeProps> = ({ data, dragHandle }) => {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
@@ -21,10 +23,12 @@ const SelectorNode: FC<NodeProps> = ({ data, dragHandle }) => {
 
     
 
-    const { used, req, sideBar, setSideBar, setInfoCourse, infoCourse } = useCourses();
+    const { used, currentTerm, req, sideBar, setSideBar, setInfoCourse, infoCourse } = useCourses();
     const selected = (data.children as { course: string, selected: boolean, color: string }[]).find((child) => child.selected);
     // console.log({selected, children: data.children});
-    
+
+    const currentlyUsed = used[data.code] !== undefined && matchIndex(currentTerm, used[data.code]);
+    const previouslyUsed = (used.hasOwnProperty(data.code) && checkIndex(currentTerm, used[data.code]));
     const unlocked = !selected || (selected && (req[selected.course] === undefined || req[selected.course].every((r) => used[r] !== undefined)));
     const handleClick: React.MouseEventHandler<HTMLDivElement> = (e) => {   
         if(sideBar !== SIDEBAR.INFO) setSideBar(SIDEBAR.INFO);
@@ -53,11 +57,24 @@ const SelectorNode: FC<NodeProps> = ({ data, dragHandle }) => {
                 ...{
                     boxShadow: `-3px 5px ${!selected ? data.background : "#000"}`,
                     // background: unlocked ? "linear-gradient(to right, rgb(185, 28, 28), rgb(109, 40, 217), rgb(202, 138, 4), rgb(185, 28, 28)) 0% 0% / 200%" : "#404040",
-                    background: unlocked ? (selected ? selected.color :"#171717") : "#404040",
+                    // background: unlocked ? (selected ? selected.color :"#171717") : "#404040",
+                    backgroundColor:
+                        previouslyUsed && sideBar === SIDEBAR.COURSES ?
+                        "green" :
+                        (
+                            selected ?
+                            selected.color :
+                            (
+                                unlocked || sideBar !== SIDEBAR.COURSES ?
+                                data.background :
+                                "#404040"
+                            )
+                        ),
                     animation: "1.5s linear 0s infinite normal none running background-pan",
                     zIndex: 9999999,
                     transition: "all 0.2s ease-in-out",
-                    opacity: selected && used.hasOwnProperty(selected?.course) ? 0.5 : 1,
+                    opacity: (currentlyUsed || previouslyUsed) && sideBar === SIDEBAR.COURSES && selected ? 0.7 : 1,
+                    // opacity: selected && used.hasOwnProperty(selected?.course) ? 0.5 : 1,
                     cursor: sideBar !== SIDEBAR.COURSES ? "pointer" : (used.hasOwnProperty(data.code) || !unlocked ? "not-allowed" : "grab"),
                     // filter: !unlocked ? "grayscale(100%)" : "none",
                     borderColor: "#000",
@@ -66,6 +83,13 @@ const SelectorNode: FC<NodeProps> = ({ data, dragHandle }) => {
                 },
             }}
         >
+            {
+                (currentlyUsed && sideBar === SIDEBAR.COURSES) && (
+                    <div className="shrink-0 text-white absolute z-20 top-0 right-0 translate-x-1/2 -translate-y-1/2">
+                        <CheckIcon className="h-6 w-6 bg-cyan-700 rounded-full" />
+                    </div>
+                )
+            }
             <div 
                 className="text-white font-JetBrainsMono px-1 rounded" 
                 style={{

@@ -169,9 +169,10 @@ a {
   filter: brightness(1.1);
   /* color: #86efac; */
 }
-.Summer {
-  background-color: rgb(202 138 4 / 0.9); /* yellow for fall */
+.Summer:hover {
+  background-color: rgb(202 138 4 / 0.6); /* yellow for fall */
 }
 .Summer_Selected {
-  background-color: rgb(202 138 4 / 0.7); /* yellow for fall */
+  background-color: rgb(202 138 4); /* yellow for fall */
+  filter: brightness(1.1);
 }

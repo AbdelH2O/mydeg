@@ -4,9 +4,10 @@ import Providers from '../components/Providers';
 import Loader from '../components/Loader';
 import { ToastContainer } from 'react-toastify';
 import { Analytics } from '@vercel/analytics/react';
+import { trpc } from '../utils/trpc';
 import 'react-toastify/dist/ReactToastify.css';
 
-export default function App({ Component, pageProps }: AppProps) {
+const App = ({ Component, pageProps }: AppProps) => {
   return (
     <Providers>
       <Loader />
@@ -16,3 +17,5 @@ export default function App({ Component, pageProps }: AppProps) {
     </Providers>
   );
 }
+
+export default trpc.withTRPC(App);

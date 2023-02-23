@@ -3,64 +3,69 @@ import React, { FC, memo } from "react";
 import { Handle, NodeProps, Position, WrapNodeProps } from "reactflow";
 import { useCourses } from "../../../hooks/useCourses";
 import { SIDEBAR } from "../../../types/SideBar";
-import checkIndex from "../../../utils/util";
+import checkIndex, { matchIndex } from "../../../utils/util";
+import { CheckIcon } from "../../icons";
 
 const CourseNode: FC<NodeProps> = ({ data, dragHandle }) => {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
         id: data.code,
         data: data,
     });
-    const style = transform
-        ? {
-            //   transform: CSS.Translate.toString(transform),
-            opacity: 0.5,
-        }
-        : undefined;
 
     const { used, currentTerm, majorMinor, infoCourse, setInfoCourse, sideBar, setSideBar, req } = useCourses();
 
     const atrr = sideBar === SIDEBAR.COURSES ? { ...attributes, ...listeners } : {};
     const unlocked =
         (
-            req[data.code] === undefined &&
-            majorMinor.term.type === currentTerm.type &&
-            majorMinor.term.year === currentTerm.year
+            req[data.code] === undefined
         ) ||
         (
             req[data.code] !== undefined &&
             req[data.code].every((r) => used[r] !== undefined && checkIndex(currentTerm, used[r]))
         );
-
-    const handleClick: React.MouseEventHandler<HTMLDivElement> = (e) => {        
+    if(data.code === "FYE 1101") {
+        console.log(unlocked);
+    }
+    const currentlyUsed = used[data.code] !== undefined && matchIndex(currentTerm, used[data.code]);
+    const previouslyUsed = (used.hasOwnProperty(data.code) && checkIndex(currentTerm, used[data.code]));
+    const handleClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
         if(sideBar !== SIDEBAR.INFO) setSideBar(SIDEBAR.INFO);
         if(infoCourse.id !== data.code) setInfoCourse({ id: data.code, credits: data.credits, name: data.name });
         listeners && listeners.onKeyDown(e);
     };
-    console.log(data.code === "MTH 1303" ? checkIndex(currentTerm, used[data.code]) : "");
-    // console.log(data.code === "MTH 2301" ? checkIndex(currentTerm, used[data.code]) : "");
-    
     
     return (
         <div
             ref={!used.hasOwnProperty(data.code) && unlocked && sideBar === SIDEBAR.COURSES ? setNodeRef : undefined}
             {...atrr}
             onClick={handleClick}
-            className="px-4 py-2 border-2 border-black rounded blurred"
+            className="px-4 py-2 border-2 border-black rounded blurred relative"
             style={{
-                ...style,
-                ...{
-                    boxShadow: `-3px 5px #000`,
-                    backgroundColor: used.hasOwnProperty(data.code) && checkIndex(currentTerm, used[data.code]) ? "green" : (unlocked && checkIndex(currentTerm, used[data.code]) ? data.background : "#404040"),
-                    zIndex: 9999999,
-                    transition: "all 0.2s ease-in-out",
-                    // opacity: used.hasOwnProperty(data.code) ? 0.5 : 1,
-                    cursor: used.hasOwnProperty(data.code) || !unlocked ? "not-allowed" : "grab",
-                    // filter: !unlocked ? "grayscale(100%)" : "none",
-                    borderColor: "#000",
-                    // borderRadius: "0.25rem",
-                },
+                boxShadow: `-3px 5px #000`,
+                backgroundColor:
+                    previouslyUsed && sideBar === SIDEBAR.COURSES ?
+                    "green" :
+                    (
+                        unlocked || sideBar !== SIDEBAR.COURSES ?
+                        data.background :
+                        "#404040"
+                    ),
+                zIndex: 9999999,
+                transition: "all 0.2s ease-in-out",
+                opacity: (currentlyUsed || previouslyUsed) && sideBar === SIDEBAR.COURSES ? 0.7 : 1,
+                cursor: used.hasOwnProperty(data.code) || !unlocked ? "not-allowed" : "grab",
+                // filter: !unlocked ? "grayscale(100%)" : "none",
+                borderColor: "#000",
+                // borderRadius: "0.25rem",
             }}
         >
+            {
+                (currentlyUsed && sideBar === SIDEBAR.COURSES) && (
+                    <div className="shrink-0 text-white absolute z-20 top-0 right-0 translate-x-1/2 -translate-y-1/2">
+                        <CheckIcon className="h-6 w-6 bg-cyan-700 rounded-full" />
+                    </div>
+                )
+            }
             <div 
                 className="text-white font-JetBrainsMono bg-black px-1 rounded" 
             >

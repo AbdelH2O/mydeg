@@ -144,9 +144,7 @@ const getDegree = async (
                 }
                 const courses = term.Degree_Term_Course.map((course: {term: string, course: string}) => {
                     // const courses = (coursesMap.get(course.term) || []).concat(course.course);
-                    
-                    used[course.course] = { type: course.term, year: term.year};
-                    
+                    used[course.course] = { type: term.type, year: term.year};
                     return course.course;
                 });
                 coursesMap.set(term.id, Array.from(new Set(courses)));
