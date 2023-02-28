@@ -64,7 +64,10 @@ export const CoursesProvider = ({
                 NProgress.start();
                 const mm = await getDegree(id as string, setMajorMinor, coursesMap, setTerms, setUsed, supabase);
                 mm.term.type && (setCurrentTerm(mm.term as {type: TERMS, year: string, id: string}));
-                mm.major && (await getCourses(mm.major, id as string, setNodes, setEdges, setColors, setReq, supabase, setInfo));
+                if(mm.major) {
+                    const major = await getCourses(mm.major, id as string, setNodes, nodes, setEdges, edges, setColors, colors, setReq, req, supabase, setInfo, info)
+                    mm.minor && (await getCourses(mm.minor, id as string, setNodes, major.nodes, setEdges, major.edges, setColors, major.colors, setReq, major.req, supabase, setInfo, major.info));
+                };
                 mm.minor && (NProgress.done());
                 setLoading(false);
             })();
@@ -172,11 +175,16 @@ const getCourses = async (
     id: string,
     degreeId: string,
     setNodes: React.Dispatch<React.SetStateAction<Node[]>>,
+    nodes: Node[],
     setEdges: React.Dispatch<React.SetStateAction<Edge[]>>,
+    edges: Edge[],
     setColors: React.Dispatch<React.SetStateAction<{[key: string]: string}>>,
+    iColors: {[key: string]: string},
     setReq: React.Dispatch<React.SetStateAction<{[key: string]: string[]}>>,
+    iReq: {[key: string]: string[]},
     supabase: SupabaseClient<Database>,
-    setInfo: React.Dispatch<React.SetStateAction<{[key: string]: {name: string, desc: string, credits: number, background: string}}>>
+    setInfo: React.Dispatch<React.SetStateAction<{[key: string]: {name: string, desc: string, credits: number, background: string}}>>,
+    iInfo: {[key: string]: {name: string, desc: string, credits: number, background: string}}
 ) => {
     const { data, error } = await supabase
         .from("Majors")
@@ -274,8 +282,8 @@ const getCourses = async (
             },
         };
     }).filter((node) => node !== undefined) as Node[];
-    setColors(colors);
-    setInfo(info);
+    setColors({ ...iColors, ...colors });
+    setInfo({ ...iInfo, ...info });
     const parentNodes: Node[] = Object.keys(parents).map((par: string) => {
         return {
             id: par,
@@ -296,17 +304,28 @@ const getCourses = async (
         };
     });
     
-    setNodes([...parentNodes, ...nodes_pre]);
+    setNodes([...nodes ,...parentNodes, ...nodes_pre]);
+
+    const selectables: string[] = [];
+
+    const isChild = new Map<string, string>();
+    Object.keys(parents).forEach((par) => {
+        parents[par].forEach((child) => {
+            isChild.set(child.course, child.selected ? par : "n");
+            selectables.push(child.course);
+        });
+    });    
     
     const { data: data2, error: error2 } = await supabase
         .from("Course_Course")
         .select(`*`)
         .in(
             "course",
-            data![0].Major_Course.map(
+            [...data![0].Major_Course.map(
                 (majorCourse) => majorCourse.course
-            )
+            ), ...selectables]
         );
+
     const req: {[key: string]: string[]} = {};
     if (error2 || data2 === null || data2.length === 0 || data2[0] === null) {
         throw error2;
@@ -314,20 +333,24 @@ const getCourses = async (
     const edges_temp: Edge[] = data2
         .filter(
             (requisite) =>
-                (requisite.group == groups.get(requisite.course)?.group ||
-                    requisite.type == "co")
+                (requisite.group === groups.get(requisite.course)?.group ||
+                    requisite.type === "co")
         )
         .map((requisite) => {
-            if (requisite.type == "pre") {
-                if (req[requisite.course] == undefined) {
+            if (requisite.type === "pre") {
+                if (req[requisite.course] === undefined) {
                     req[requisite.course] = [];
                 }
                 req[requisite.course].push(requisite.requisite);
             }
+            if(isChild.get(requisite.course) === "n") {
+                return undefined;
+            }
+            const name = isChild.get(requisite.course) !== undefined ? isChild.get(requisite.course)! : requisite.course;
             return {
                 id: `${requisite.course} -> ${requisite.requisite}`,
                 source: requisite.requisite,
-                target: requisite.course,
+                target: name,
                 sourceHandle:
                     (coord.get(requisite.requisite) || { x: 0 }).x <
                     coord.get(requisite.course)!.x
@@ -339,17 +362,7 @@ const getCourses = async (
                             ? requisite.requisite + "bottom"
                             : requisite.requisite + "top"
                         : requisite.requisite + "left",
-                targetHandle: requisite.course + "tarTop",
-                    // (coord.get(requisite.requisite) || { x: 0 }).x <
-                    // coord.get(requisite.course)!.x
-                    //     ? requisite.course + "tarLeft"
-                    //     : (coord.get(requisite.requisite) || { x: 0 }).x ==
-                    //         coord.get(requisite.course)!.x
-                    //     ? (coord.get(requisite.requisite) || { y: 0 }).y <
-                    //         coord.get(requisite.course)!.y
-                    //         ? requisite.course + "tarTop"
-                    //         : requisite.course + "tarBottom"
-                    //     : requisite.course + "tarRight",
+                targetHandle: name + "tarTop",
                 type: "smoothstep",
                 animated: requisite.type === "co",
                 markerEnd: {
@@ -367,12 +380,19 @@ const getCourses = async (
                     strokeWidth: 2,
                 },
             };
-        });
-    setReq(req);
-    setEdges(edges_temp);
+        }).filter((edge) => edge !== undefined) as Edge[];
+    setReq({ ...iReq, ...req });
+    setEdges([...edges, ...edges_temp]);
     // console.log(edges_temp);
     
     groups.clear();
     coord.clear();
     added.clear();
+    return {
+        nodes: [...parentNodes, ...nodes_pre],
+        edges: edges_temp,
+        colors: colors,
+        info: info,
+        req: req,
+    }
 };

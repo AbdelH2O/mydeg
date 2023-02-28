@@ -48,7 +48,7 @@ const SideBar = ({
     const [hovering, setHovering] = useState(false);
     const [display, setDisplay] = useState(false);
     // Adding term dialog
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
 
     const { id } = useRouter().query;
     const { supabase } = useSupabase();
@@ -87,10 +87,6 @@ const SideBar = ({
             setHovering(false);
         }
     }
-
-    useEffect(() => {
-        console.log("activeId", activeId);
-    }, [activeId]);
 
     // handling clicking on a term
     const handleClick = (term: {type: string, year: string, id: string}) => {
@@ -335,9 +331,7 @@ const SideBar = ({
                             coursesMap.get(currentTerm.id)?.map((course, index) => {
                                 // console.log(info[course]);
                                 // const level = ["Introductory", "Intermediate", "Advanced", "Expert"];
-                                const courseLevel = level[Math.max(parseInt(course[4]) - 1, 0)];
-                                console.log({courseLevel, index: parseInt(course[4]) - 1});
-                                
+                                const courseLevel = level[Math.max(parseInt(course[4]) - 1, 0)];                                
                                 return (
                                     <div key={index} className="w-full p-2 pb-0">
                                         <div className="border-2 border-black bg-cyan-100 rounded p-2 shadow-md font-JetBrainsMono" style={{boxShadow: `-3px 5px #000`, backgroundColor: info[course]?.desc}}>

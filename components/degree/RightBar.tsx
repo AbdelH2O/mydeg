@@ -34,6 +34,7 @@ const RightBar = () => {
     const { sideBar, setUsed, map, setMap, infoCourse, used, setInfoCourse, setNodes, setEdges, req } = useCourses();
     const [index, setIndex] = useState(0);
     const [levelIndex, setLevelIndex] = useState('1');
+    const [changing, setChanging] = useState(false);
     const [selectedCourse, setSelectedCourse] = useState<{
         course: string;
         name: string;
@@ -67,11 +68,41 @@ const RightBar = () => {
         selected: boolean;
         color: string;
     }) => {
-        setEdges((edges) => {
-            
+        if(changing) {
+            return;
+        }
+        setChanging(true);
+
+        // FIXME: could be more efficient by not relying on the Node's data and using the wrapper's state instead (check if this causes a re-render)
+        setNodes((nodes) => {
+            return nodes.map((node) => {
+                if(node.id === infoCourse.id) {
+                    return {
+                        ...node,
+                        data: {
+                            ...node.data,
+                            children: node.data.children?.map((child: {course: string, selected: boolean}) => {
+                                if(child.course === e.course) {
+                                    return {
+                                        ...child,
+                                        selected: true
+                                    }
+                                }
+                                return {
+                                    ...child,
+                                    selected: false
+                                }
+                            })
+                        }
+                    }
+                }
+                return node;
+            })
+        });
+        setEdges((edges) => {            
             return [
                 ...(edges.map((edge) => {
-                    if(edge.target === selectedCourse.course) {
+                    if(edge.target === infoCourse.id) {
                         return undefined;
                     }
                     return edge;
@@ -96,7 +127,7 @@ const RightBar = () => {
                             stroke: e.color,
                             strokeWidth: 2,
                         },
-                    }
+                    }                    
                 }) : []),
             ]
         });
@@ -105,32 +136,6 @@ const RightBar = () => {
             selected: true
         });
         
-        setNodes((nodes) => {
-            return nodes.map((node) => {
-                
-                if(node.id === infoCourse.id) {
-                    return {
-                        ...node,
-                        data: {
-                            ...node.data,
-                            children: node.data.children?.map((child: {course: string, selected: boolean}) => {
-                                if(child.course === e.course) {
-                                    return {
-                                        ...child,
-                                        selected: true
-                                    }
-                                }
-                                return {
-                                    ...child,
-                                    selected: false
-                                }
-                            })
-                        }
-                    }
-                }
-                return node;
-            })
-        });
         setInfoCourse({
             ...infoCourse,
             children: infoCourse.children?.map((child) => {
@@ -150,12 +155,11 @@ const RightBar = () => {
             let termId = '';
             // FIXME: could be more efficient
             map.forEach((courses, term) => {
-                
                 if(courses.includes(selectedCourse.course)) {
                     termId = term;
                 }
             });
-            const { data, error } = termId ? await removeCourse(termId, selectedCourse.course, supabase) : {data: null, error: null};
+            const { data, error } = termId ? await removeCourse(termId, selectedCourse.course, supabase) : {data: null, error: 1};
             
             if(error) {
                 toast.error("Error removing course");
@@ -176,11 +180,12 @@ const RightBar = () => {
             
         }
         const { data, error } = await setSelected(supabase, e.course, id as string, infoCourse.id);
+        setChanging(false);
         if(error) {
             toast.error("Error selecting course");
             return;
         }
-                
+        
     }
     return (
         <div className="h-[calc(100vh-4rem)] absolute">
@@ -292,15 +297,17 @@ const RightBar = () => {
                                                                             relative flex cursor-pointer transition-all rounded px-3 py-2 shadow-md focus:outline-none border border-black`
                                                                         }
                                                                         style={{
-                                                                            backgroundColor: child.selected ? child.color : '#000',
+                                                                            backgroundColor: child.selected ? child.color : 'rgb(22 78 99)',
                                                                             boxShadow: `-3px 5px ${child.selected ? '#000' : child.color}`,
-                                                                            color: child.selected ? '#fff' : child.color
+                                                                            // color: child.selected ? '#fff' : child.color
+                                                                            color: "#fff",
+                                                                            borderColor: child.selected ? '#000' : "rgb(22 78 99)"
                                                                         }}
                                                                     >
                                                                         {({ active, checked }) => (
                                                                         <>
                                                                             <div className="flex w-full items-center justify-center">
-                                                                                <div className="flex items-center bg-black rounded p-2 font-JetBrainsMono">
+                                                                                <div className="flex items-center rounded p-2 font-JetBrainsMono" style={ child.selected ? { background: "#000" } : {}}>
                                                                                     <div className="text-lg">
                                                                                     <RadioGroup.Label
                                                                                         as="p"

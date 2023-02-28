@@ -93,7 +93,7 @@ const Degree = () => {
     return (
         <>
             <Head>
-                <title>{majorMinor.major} degree</title>
+                <title>{majorMinor.major} degree | Compass</title>
             </Head>
             <div className='h-[calc(100vh-4rem)] mt-16 w-screen flex flex-col overflow-hidden'>
                 <DndContext

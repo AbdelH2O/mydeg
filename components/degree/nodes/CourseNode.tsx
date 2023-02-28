@@ -23,9 +23,6 @@ const CourseNode: FC<NodeProps> = ({ data, dragHandle }) => {
             req[data.code] !== undefined &&
             req[data.code].every((r) => used[r] !== undefined && checkIndex(currentTerm, used[r]))
         );
-    if(data.code === "FYE 1101") {
-        console.log(unlocked);
-    }
     const currentlyUsed = used[data.code] !== undefined && matchIndex(currentTerm, used[data.code]);
     const previouslyUsed = (used.hasOwnProperty(data.code) && checkIndex(currentTerm, used[data.code]));
     const handleClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
@@ -48,12 +45,12 @@ const CourseNode: FC<NodeProps> = ({ data, dragHandle }) => {
                     (
                         unlocked || sideBar !== SIDEBAR.COURSES ?
                         data.background :
-                        "#404040"
+                        "rgb(22 78 99)" // blue-900
                     ),
                 zIndex: 9999999,
                 transition: "all 0.2s ease-in-out",
                 opacity: (currentlyUsed || previouslyUsed) && sideBar === SIDEBAR.COURSES ? 0.7 : 1,
-                cursor: used.hasOwnProperty(data.code) || !unlocked ? "not-allowed" : "grab",
+                cursor: sideBar !== SIDEBAR.COURSES ? "pointer" : (used.hasOwnProperty(data.code) || !unlocked ? "not-allowed" : "grab"),
                 // filter: !unlocked ? "grayscale(100%)" : "none",
                 borderColor: "#000",
                 // borderRadius: "0.25rem",

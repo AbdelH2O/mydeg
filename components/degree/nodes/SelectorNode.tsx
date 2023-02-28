@@ -29,7 +29,7 @@ const SelectorNode: FC<NodeProps> = ({ data, dragHandle }) => {
 
     const currentlyUsed = used[data.code] !== undefined && matchIndex(currentTerm, used[data.code]);
     const previouslyUsed = (used.hasOwnProperty(data.code) && checkIndex(currentTerm, used[data.code]));
-    const unlocked = !selected || (selected && (req[selected.course] === undefined || req[selected.course].every((r) => used[r] !== undefined)));
+    const unlocked = !selected ? false : (selected && (req[selected.course] === undefined || req[selected.course].every((r) => used[r] !== undefined)));
     const handleClick: React.MouseEventHandler<HTMLDivElement> = (e) => {   
         if(sideBar !== SIDEBAR.INFO) setSideBar(SIDEBAR.INFO);
         if(infoCourse.id !== data.code) setInfoCourse({ id: data.code, credits: data.credits, name: data.name, children: data.children });
@@ -62,12 +62,12 @@ const SelectorNode: FC<NodeProps> = ({ data, dragHandle }) => {
                         previouslyUsed && sideBar === SIDEBAR.COURSES ?
                         "green" :
                         (
-                            selected ?
+                            selected && unlocked ?
                             selected.color :
                             (
-                                unlocked || sideBar !== SIDEBAR.COURSES ?
+                                unlocked || (sideBar !== SIDEBAR.COURSES && selected) ?
                                 data.background :
-                                "#404040"
+                                "rgb(22 78 99)" // blue-900
                             )
                         ),
                     animation: "1.5s linear 0s infinite normal none running background-pan",
@@ -77,7 +77,7 @@ const SelectorNode: FC<NodeProps> = ({ data, dragHandle }) => {
                     // opacity: selected && used.hasOwnProperty(selected?.course) ? 0.5 : 1,
                     cursor: sideBar !== SIDEBAR.COURSES ? "pointer" : (used.hasOwnProperty(data.code) || !unlocked ? "not-allowed" : "grab"),
                     // filter: !unlocked ? "grayscale(100%)" : "none",
-                    borderColor: "#000",
+                    borderColor: "rgb(22 78 99)",
                     // border: '1px',
                     // borderRadius: "0.25rem",
                 },
@@ -94,7 +94,8 @@ const SelectorNode: FC<NodeProps> = ({ data, dragHandle }) => {
                 className="text-white font-JetBrainsMono px-1 rounded" 
                 style={{
                     background: selected ? '#000' : "",
-                    color: !selected ? data.background : "#fff",
+                    // color: !selected ? data.background : "#fff",
+                    color: "#fff",
                 }}
             >
                 {
@@ -174,6 +175,7 @@ const SelectorNode: FC<NodeProps> = ({ data, dragHandle }) => {
             <Handle
                 type="target"
                 position={Position.Top}
+                // id={data.code + "tarTop"}
                 id={data.code + "tarTop"}
                 // style={{ display: 'none' }}
                 style={{

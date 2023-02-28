@@ -6,7 +6,6 @@ const Login = () => {
     const router = useRouter();
     const handleLogin = async () => {
         const response = await msalLogin();
-        console.log({response, type: typeof response});
         if(response !== undefined && response?.accessToken) {
             router.push("/dashboard");
         }

@@ -101,7 +101,6 @@ const Dashboard = () => {
             toast.error("Failed to add degree");
             return;
         }
-        console.log(data);
         setDegrees((prev) => {
             return [
                 ...prev,
@@ -146,7 +145,6 @@ const Dashboard = () => {
                 toast.error("Failed to fetch data");
                 return;
             }
-            console.log(data);
             const degs = data.map((dd) => {
                 return {
                     ...dd,
@@ -633,8 +631,6 @@ const Dashboard = () => {
                                     {degrees.length !== 0 ? (
                                         <div className="mt-5 min-h-fit grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                                             {degrees.map((degree, index) => {
-                                                console.log(index);
-
                                                 return (
                                                     <Link href={`/degree/${degree.id}`} passHref key={index}>
                                                         <div

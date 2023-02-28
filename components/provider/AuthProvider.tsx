@@ -42,7 +42,6 @@ const AuthProvider = ({ children }: { children: JSX.Element[] | JSX.Element}) =>
     const [user, setUser] = useState<null | AccountInfo>(null);
     useEffect(() => {
         const account = msalApp.getAllAccounts()[0];
-        console.log("account", account);
         
         if(router.route === "/login") {
             if(account) {
