@@ -29,7 +29,7 @@ export const msalLogin = async () => {
         const response = await msalApp.loginPopup({
             scopes,
             prompt: "select_account",
-        });
+        });        
         return response;
     } catch (err) {
         console.dir(err); // HACK proper error handling
@@ -49,10 +49,10 @@ const AuthProvider = ({ children }: { children: JSX.Element[] | JSX.Element}) =>
             }
             return;
         } else if(!account) {
-            // router.push("/login");
+            router.push("/login");
             return;
         }
-    }, [router.route]);
+    }, [router.route, user]);
 
     useEffect(() => {
         const account = msalApp.getAllAccounts()[0];

@@ -1,12 +1,15 @@
 import { msalLogin } from "../../components/provider/AuthProvider";
 import { Lock, Outlook, Email } from "../../components/icons";
 import { useRouter } from "next/router";
+import { useAuth } from "../../hooks/useAuth";
 
 const Login = () => {
     const router = useRouter();
+    const { setUser } = useAuth();
     const handleLogin = async () => {
         const response = await msalLogin();
         if(response !== undefined && response?.accessToken) {
+            setUser(response.account);
             router.push("/dashboard");
         }
 

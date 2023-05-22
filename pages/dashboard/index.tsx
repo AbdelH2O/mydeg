@@ -8,12 +8,19 @@ import { getDegrees, getSingleTerms, addDegree } from "../../utils/bridge";
 import { toast } from "react-toastify";
 import Link from "next/link";
 import Head from "next/head";
+import CBox from "../../components/Combobox";
 
 const user = {
     name: "Tom Cook",
     email: "tom@example.com",
     imageUrl: "https://avatars.dicebear.com/api/micah/4.svg",
 };
+const mjrs = [
+    "BSCSC"
+];
+const minors = [
+    "BA",
+];
 const navigation = [
     { name: "Dashboard", href: "#", current: true },
     { name: "Courses", href: "#", current: false },
@@ -32,16 +39,17 @@ function classNames(...classes: string[]) {
 }
 const Dashboard = () => {
     const { user: account } = useAuth();
+    // if(!account) return <div>loading</div>
     const { supabase } = useSupabase();
     const [majors, setMajors] = useState<{
         id: string;
         value: string;
         type: string;
     }>();
-    const [details, setDetails] = useState<{
-        major: string;
-        minor: string;
-    }>({ major: "", minor: "" });
+    // const [details, setDetails] = useState<{
+    //     major: string;
+    //     minor: string;
+    // }>({ major: "", minor: "" });
     const [degrees, setDegrees] = useState<
         {
             id: string;
@@ -83,6 +91,8 @@ const Dashboard = () => {
         }[]
     >([]);
     const [open, setOpen] = useState(false);
+    const [mjr, setMajor] = useState("BSCSC");
+    const [minor, setMinor] = useState("BA");
 
 
     const handleAddDegree = async () => {
@@ -92,8 +102,8 @@ const Dashboard = () => {
         }
         const { data, error, success } = await addDegree(
             account?.username.toLowerCase(),
-            details.major,
-            details.minor,
+            mjr,
+            'BSCSC/BA',
             supabase
         );
         if (!success || data === null) {
@@ -101,6 +111,7 @@ const Dashboard = () => {
             toast.error("Failed to add degree");
             return;
         }
+        toast.success("Successfully added degree");
         setDegrees((prev) => {
             return [
                 ...prev,
@@ -132,6 +143,8 @@ const Dashboard = () => {
     };
 
     useEffect(() => {
+        console.log("fetching data");
+        console.log(account);
         if (!account?.username || !supabase) return;
         const getData = async () => {
             const { data, error, success } = await getDegrees(
@@ -869,12 +882,28 @@ const Dashboard = () => {
                                                 </Dialog.Title>
                                                 <div className="mt-2 px-2">
                                                     <p className="text-sm text-gray-500">
-                                                        Your payment has been
-                                                        successfully submitted.
-                                                        We&apos;ve sent you an email with
-                                                        all of the details of your
-                                                        order.
+                                                        Create a new degree plan:
                                                     </p>
+                                                </div>
+                                                <div className="mt-4 px-2">
+                                                    <label className="block text-sm font-medium text-gray-700">
+                                                        Major
+                                                    </label>
+                                                    <CBox
+                                                        options={mjrs}
+                                                        selected={mjr}
+                                                        setSelected={setMajor}
+                                                    />
+                                                </div>
+                                                <div className="mt-4 px-2">
+                                                    <label className="block text-sm font-medium text-gray-700">
+                                                        Minor
+                                                    </label>
+                                                    <CBox
+                                                        options={minors}
+                                                        selected={minor}
+                                                        setSelected={setMinor}
+                                                    />
                                                 </div>
 
                                                 <div className="mt-4 px-2">

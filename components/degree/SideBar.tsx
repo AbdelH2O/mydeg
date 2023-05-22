@@ -10,6 +10,7 @@ import { LeafIcon, SnowIcon, SunIcon } from "../icons";
 import { toast } from "react-toastify";
 import { addTerm } from "../../utils/bridge";
 import { useRouter } from "next/router";
+import MenuButton from "./MenuButton";
 
 const map: {[key: string]: string} = {
     Fall: 'FA',
@@ -239,16 +240,6 @@ const SideBar = ({
                                         })
                                     }
                                 </div>
-{/* 
-                                <div className="mt-4">
-                                    <button
-                                    type="button"
-                                    className="inline-flex justify-center rounded border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                                    onClick={closeModal}
-                                    >
-                                    Add
-                                    </button>
-                                </div> */}
                             </Dialog.Panel>
                         </Transition.Child>
                         </div>
@@ -295,8 +286,8 @@ const SideBar = ({
                     //     backgroundSize: "23px 23px",
                     // }}
                 >
-                    <div className="w-full">
-                        <div className="w-full mx-auto pb-2 h-20 bg-cyan-800 border-0 border-cyan-70 0 flex flex-col justify-center items-center round ed font-bold font-Poppins text-2xl">
+                    <div className="w-full flex flex-row bg-cyan-800 items-center relative">
+                        <div className="w-full mx-auto pb-2 h-20 border-0 border-cyan-70 0 flex flex-col justify-center items-center round ed font-bold font-Poppins text-2xl">
                             <p>
                                 {currentTerm.type + " " + currentTerm.year}
                             </p>
@@ -309,6 +300,7 @@ const SideBar = ({
                                 </p>
                             </div>
                         </div>
+                        <MenuButton />
                     </div>
                     <div className="bg-cyan-800 w-full h-1 -z-10">
                         <div className="bg-white rounded-tl h-2">
