@@ -47,7 +47,7 @@ const SideBar = ({
     onSideBarRefChange: (node: HTMLDivElement) => void;
 }) => {
     const [hovering, setHovering] = useState(false);
-    const [display, setDisplay] = useState(false);
+    // const [display, setDisplay] = useState(true);
     // Adding term dialog
     const [isOpen, setIsOpen] = useState(false);
 
@@ -73,17 +73,19 @@ const SideBar = ({
     } = useCourses();
 
     const show = sideBar === SIDEBAR.COURSES;
+    const display = sideBar === SIDEBAR.COURSES;
+
 
     // handling closing the sidebar
     const handleClose = () => {
         if(show) {
             setSideBar(SIDEBAR.NONE);
             setHovering(false);
-            setTimeout(() => {
-                setDisplay(!display);
-            }, 300);
+            // setTimeout(() => {
+            //     setDisplay(!display);
+            // }, 300);
         } else {
-            setDisplay(!display);
+            // setDisplay(!display);
             setSideBar(SIDEBAR.COURSES);
             setHovering(false);
         }
