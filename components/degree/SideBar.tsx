@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import { addTerm } from "../../utils/bridge";
 import { useRouter } from "next/router";
 import MenuButton from "./MenuButton";
+import ProgressBar from "@ramonak/react-progress-bar";
 
 const map: {[key: string]: string} = {
     Fall: 'FA',
@@ -301,7 +302,8 @@ const SideBar = ({
                                     &nbsp;{coursesMap.get(currentTerm.id)?.reduce((acc, course) => acc + info[course]?.credits, 0)} credits
                                 </p>
                             </div>
-                        </div>
+                                    <ProgressBar completed={`${coursesMap.get(currentTerm.id)?.reduce((acc, course) => acc + info[course]?.credits, 0)}`} maxCompleted={22} width="200px" bgColor="#0d2e3c" />
+                                </div>
                         <MenuButton />
                     </div>
                     <div className="bg-cyan-800 w-full h-1 -z-10">
