@@ -2,12 +2,23 @@ import { Menu, Transition } from "@headlessui/react";
 import { Fragment, SVGProps } from "react";
 import ThreeDots from "../icons/ThreeDots";
 
-const MenuButton = () => {
+type MenuButtonProps = {
+    handleClearTerm: () => Promise<void>;
+};
+
+
+const MenuButton: React.FC<MenuButtonProps> = ({handleClearTerm}) => {
     return (
-        <Menu as="div" className="absolute inline-block text-left right-0 top-1/2 -translate-y-1/2">
+        <Menu
+            as="div"
+            className="absolute inline-block text-left right-0 top-1/2 -translate-y-1/2"
+        >
             <div>
                 <Menu.Button className="inline-flex w-full justify-center rounded-md px-4 py-2 text-sm font-normal font-Lato text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
-                    <ThreeDots className="ml-2 -mr-1 h-5 w-5 text-violet-200 hover:text-violet-100" fill={'white'}/>
+                    <ThreeDots
+                        className="ml-2 -mr-1 h-5 w-5 text-violet-200 hover:text-violet-100"
+                        fill={"white"}
+                    />
                     {/* <ChevronDownIcon
                         className="ml-2 -mr-1 h-5 w-5 text-violet-200 hover:text-violet-100"
                         aria-hidden="true"
@@ -46,6 +57,31 @@ const MenuButton = () => {
                                         />
                                     )}
                                     Delete Term
+                                </button>
+                            )}
+                        </Menu.Item>
+                        <Menu.Item>
+                            {({ active }) => (
+                                <button
+                                    className={`${
+                                        active
+                                            ? "bg-cyan-500 text-white"
+                                            : "text-gray-900"
+                                    } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                                    onClick={handleClearTerm}
+                                >
+                                    {active ? (
+                                        <DeleteActiveIcon
+                                            className="mr-2 h-5 w-5"
+                                            aria-hidden="true"
+                                        />
+                                    ) : (
+                                        <DeleteInactiveIcon
+                                            className="mr-2 h-5 w-5"
+                                            aria-hidden="true"
+                                        />
+                                    )}
+                                    Clear Term
                                 </button>
                             )}
                         </Menu.Item>

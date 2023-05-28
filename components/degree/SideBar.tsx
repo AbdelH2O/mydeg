@@ -163,6 +163,14 @@ const SideBar = ({
             toast.error("Error adding term. Please try again later.");
         }
     }
+
+    const handleClearTerm = async () => {
+        // get course codes of the current term
+        const courseCodes = coursesMap.get(currentTerm.id) || [];
+        courseCodes.forEach(course => {
+            handleDelete(course);
+        });
+    }
     
     return (
         <div className="h-[calc(100vh-4rem)] absolute">
@@ -302,7 +310,7 @@ const SideBar = ({
                                 </p>
                             </div>
                         </div>
-                        <MenuButton />
+                        <MenuButton handleClearTerm={handleClearTerm}/>
                     </div>
                     <div className="bg-cyan-800 w-full h-1 -z-10">
                         <div className="bg-white rounded-tl h-2">
