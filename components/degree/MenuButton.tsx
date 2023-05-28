@@ -4,10 +4,11 @@ import ThreeDots from "../icons/ThreeDots";
 
 type MenuButtonProps = {
     handleClearTerm: () => Promise<void>;
+    handleDeleteTerm: () => Promise<void>;
 };
 
 
-const MenuButton: React.FC<MenuButtonProps> = ({handleClearTerm}) => {
+const MenuButton: React.FC<MenuButtonProps> = ({handleClearTerm, handleDeleteTerm}) => {
     return (
         <Menu
             as="div"
@@ -44,6 +45,7 @@ const MenuButton: React.FC<MenuButtonProps> = ({handleClearTerm}) => {
                                             ? "bg-cyan-500 text-white"
                                             : "text-gray-900"
                                     } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                                    onClick={handleDeleteTerm}
                                 >
                                     {active ? (
                                         <DeleteActiveIcon

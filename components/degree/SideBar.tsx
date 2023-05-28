@@ -9,8 +9,10 @@ import { Dialog, Transition } from "@headlessui/react";
 import { LeafIcon, SnowIcon, SunIcon } from "../icons";
 import { toast } from "react-toastify";
 import { addTerm } from "../../utils/bridge";
+import { deleteTerm } from "../../utils/bridge";
 import { useRouter } from "next/router";
 import MenuButton from "./MenuButton";
+import { set } from "nprogress";
 
 const map: {[key: string]: string} = {
     Fall: 'FA',
@@ -131,6 +133,8 @@ const SideBar = ({
         return [];
     }
 
+    
+
     const handleAddTerm = async (termType: string, termYear: string) => {
         closeModal();
         const term = Object.keys(terms).length === 0 ?
@@ -171,6 +175,50 @@ const SideBar = ({
             handleDelete(course);
         });
     }
+
+    const handleDeleteTerm = async () => {
+        if(Object.keys(terms).length === 1) {
+            // check if there are courses added
+            if(coursesMap.get(currentTerm.id)!.length === 0) {
+                toast.error("You can't delete the only term.");
+            }
+            else{
+                handleClearTerm();
+                toast.error("You can't delete the only term. It has been cleared.");
+            }
+            return;
+        }
+
+        const courseCodes = coursesMap.get(currentTerm.id) || [];
+        courseCodes.forEach(course => {
+            handleDelete(course);
+        }
+        );
+
+
+        // get the previous term
+        const prevTerm = Object.values(terms).filter(t => {
+            if(t.year === currentTerm.year) {
+                const order = ["Spring", "Summer", "Fall"];
+                return order.indexOf(t.type) < order.indexOf(currentTerm.type);
+            }
+            return parseInt(t.year) < parseInt(currentTerm.year);
+        });
+
+        const { success } = await deleteTerm(currentTerm.id, supabase);
+        if(success) {
+            const temp = {...terms};
+            delete temp[currentTerm.id];
+            setTerms(temp);
+            coursesMap.delete(currentTerm.id);
+            setMap(coursesMap);
+            setCurrentTerm(prevTerm[prevTerm.length - 1] as {type: TERMS, year: string, id: string});
+            closeModal();
+        } else {
+            toast.error("Error deleting term. Please try again later.");
+        }
+    }
+
     
     return (
         <div className="h-[calc(100vh-4rem)] absolute">
@@ -310,7 +358,7 @@ const SideBar = ({
                                 </p>
                             </div>
                         </div>
-                        <MenuButton handleClearTerm={handleClearTerm}/>
+                        <MenuButton handleClearTerm={handleClearTerm} handleDeleteTerm={handleDeleteTerm}/>
                     </div>
                     <div className="bg-cyan-800 w-full h-1 -z-10">
                         <div className="bg-white rounded-tl h-2">
