@@ -34,7 +34,8 @@ export const CoursesProvider = ({
     const [loading, setLoading] = useState(true);
     /* Keeping track of the currently selected sidebar */
     const [sideBar, setSideBar] = useState<SIDEBAR>(SIDEBAR.NONE);
-    const [terms, setTerms] = useState<{[key: string]: { type: string, year: string }}>({});
+    const [terms, setTerms] = useState<{[key: string]: { type: TERMS, year: string }}>({});
+    const getTerms = () => terms;
     const [colors, setColors] = useState<{[key: string]: string}>({});
     /* Keeping track of the currently dragged course */
     const [activeId, setActiveId] = useState<string>("");
@@ -111,7 +112,7 @@ const getDegree = async (
     id: string,
     setMajorMinor: React.Dispatch<React.SetStateAction<{major: string, minor: string, term: {type: TERMS, year: string}}>>,
     coursesMap: Map<string, string[]>,
-    setTerms: React.Dispatch<React.SetStateAction<{[key: string]: { type: string, year: string }}>>,
+    setTerms: React.Dispatch<React.SetStateAction<{[key: string]: { type: TERMS, year: string }}>>,
     setUsed: React.Dispatch<React.SetStateAction<{[key: string]: { type: string, year: string }}>>,
     supabase: SupabaseClient<Database>
 ) => {
@@ -131,7 +132,7 @@ const getDegree = async (
         // TODO: Handle error
         return { major: "", minor: "", term: {type: "", year: "", id: ""} };
     } else {
-        const terms: {[key: string]: { type: string, year: string }} = {};
+        const terms: {[key: string]: { type: TERMS, year: string }} = {};
         const indexMatch = [TERMS.FALL, TERMS.SPRING];
         // The degree start is either 0 or 1 (Fall or Spring)
         setMajorMinor({ major: data[0].major, minor: data[0].minor , term: {type: indexMatch[data[0].start], year: data[0].year}});
@@ -141,7 +142,7 @@ const getDegree = async (
         } else {
             data[0].Degree_Term.forEach(
                 (term) => {
-                terms[term.id] = { type: term.type, year: term.year };
+                terms[term.id] = { type: term.type as TERMS, year: term.year };
                 if(term.Degree_Term_Course === null || !Array.isArray(term.Degree_Term_Course)) {
                     return { major: "", minor: "", term: {type: "", year: "", id: ""} };
                 }
@@ -162,7 +163,7 @@ const getDegree = async (
                         }
                         return parseInt(terms[a].year) - parseInt(terms[b].year)
                     })
-                    .reduce((r: {[key: string]: { type: string, year: string }},k)=>(r[k]=terms[k],r),{})
+                    .reduce((r: {[key: string]: { type: TERMS, year: string }},k)=>(r[k]=terms[k],r),{})
             );
             
             return { major: data[0].major, minor: data[0].minor, term: {...terms[Object.keys(terms)[0]], id: Object.keys(terms)[0]} };
