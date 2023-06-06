@@ -249,6 +249,7 @@ const SideBar = ({
                     </div>
                 </Dialog>
             </Transition>
+
             
             <div 
                 className="h-full border border-sky-300/50 absolute z-[9999] resize-x"
