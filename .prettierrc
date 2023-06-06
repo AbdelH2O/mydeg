@@ -16,8 +16,8 @@
     "singleQuote": false,
     "tabWidth": 4,
     "trailingComma": "es5",
-    "useTabs": false,
+    "useTabs": true,
     "vueIndentScriptAndStyle": false,
-    "filepath": "/Users/hana/Documents/myDeg/mydeg/components/CourseNode.tsx",
+    "filepath": "/Users/hana/Documents/myDeg/mydeg",
     "parser": "typescript"
   }

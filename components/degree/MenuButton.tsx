@@ -42,7 +42,7 @@ const MenuButton: React.FC<MenuButtonProps> = ({handleClearTerm, handleDeleteTer
                                 <button
                                     className={`${
                                         active
-                                            ? "bg-cyan-500 text-white"
+                                            ? "bg-cyan-600 text-white"
                                             : "text-gray-900"
                                     } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                                     onClick={handleDeleteTerm}
@@ -67,7 +67,7 @@ const MenuButton: React.FC<MenuButtonProps> = ({handleClearTerm, handleDeleteTer
                                 <button
                                     className={`${
                                         active
-                                            ? "bg-cyan-500 text-white"
+                                            ? "bg-cyan-600 text-white"
                                             : "text-gray-900"
                                     } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                                     onClick={handleClearTerm}
@@ -130,12 +130,12 @@ function DeleteActiveIcon(props: SVGProps<SVGSVGElement>) {
                 y="6"
                 width="10"
                 height="10"
-                fill="#8B5CF6"
-                stroke="#C4B5FD"
+                fill="#155e75"
+                stroke="#EDE9FE"
                 strokeWidth="2"
             />
-            <path d="M3 6H17" stroke="#C4B5FD" strokeWidth="2" />
-            <path d="M8 6V4H12V6" stroke="#C4B5FD" strokeWidth="2" />
+            <path d="M3 6H17" stroke="#EDE9FE" strokeWidth="2" />
+            <path d="M8 6V4H12V6" stroke="#EDE9FE" strokeWidth="2" />
         </svg>
     );
 }

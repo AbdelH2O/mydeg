@@ -141,6 +141,28 @@ export const removeCourse = async (term: string, course: string, supabase: Supab
     };
 }
 
+export const removeTermCourses = async (term: string, supabase: SupabaseClient<Database>) => {
+    NProgress.set(0.3);
+    NProgress.start();
+    const { data: courses, error: coursesError } = await supabase
+        .from("Degree_Term_Course")
+        .delete()
+        .match({ term });
+    NProgress.done();
+    if (coursesError) {
+        return {
+            error: coursesError.message,
+            success: false,
+            data: null,
+        };
+    }
+    return {
+        error: null,
+        success: true,
+        data: courses,
+    };
+}
+
 export const getDegrees = async (user: string, supabase: SupabaseClient<Database>) => {
     NProgress.set(0.3);
     NProgress.start();

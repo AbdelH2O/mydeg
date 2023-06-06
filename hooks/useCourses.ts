@@ -19,8 +19,8 @@ const DEFAULT_CONTEXT: {
     edges: Edge[];
     setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
     loading: boolean;
-    terms: {[key: string]: { type: string, year: string }};
-    setTerms: React.Dispatch<React.SetStateAction<{[key: string]: { type: string, year: string }}>>;
+    terms: {[key: string]: { type: TERMS, year: string }};
+    setTerms: React.Dispatch<React.SetStateAction<{[key: string]: { type: TERMS, year: string }}>>;
     colors: {[key: string]: string};
     activeId: string;
     setActiveId: React.Dispatch<React.SetStateAction<string>>;
