@@ -218,6 +218,11 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.21.tgz#5de5a2385a35309427f6011992b544514d559aa1"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
 
+"@ramonak/react-progress-bar@^5.0.3":
+  version "5.0.3"
+  resolved "https://registry.yarnpkg.com/@ramonak/react-progress-bar/-/react-progress-bar-5.0.3.tgz#a3518fb19e6650e593a208dd429dca7cb6b63d52"
+  integrity sha512-VxXGKN74q94jYoeYuFNJm3xvWhVz9dy+alFZ8S4ZmTTr/05CCq9PjwthT8JB27UdAvn8pHvKBmemV8JU2cZi6A==
+
 "@reactflow/background@11.0.4":
   version "11.0.4"
   resolved "https://registry.npmjs.org/@reactflow/background/-/background-11.0.4.tgz"

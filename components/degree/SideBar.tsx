@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useCourses } from "../../hooks/useCourses";
 import { SIDEBAR } from "../../types/SideBar";
 import { TERMS } from "../../types/Terms";
@@ -10,6 +10,7 @@ import { LeafIcon, SnowIcon, SunIcon } from "../icons";
 import { toast } from "react-toastify";
 import { useRouter } from "next/router";
 import MenuButton from "./MenuButton";
+import ProgressBar from "@ramonak/react-progress-bar";
 
 const map: {[key: string]: string} = {
     Fall: 'FA',
@@ -49,6 +50,7 @@ const SideBar = ({
     // const [display, setDisplay] = useState(true);
     // Adding term dialog
     const [isOpen, setIsOpen] = useState(false);
+    const [color, setColor] = useState("gray");
 
     const { id } = useRouter().query;
     const { supabase } = useSupabase();
@@ -70,6 +72,20 @@ const SideBar = ({
         // all courses info
         info,
     } = useCourses();
+
+    useEffect(() => {
+        if(!currentTerm || Object.keys(info).length === 0 || !currentTerm.id) return;
+        const credits = (coursesMap.get(currentTerm.id) || []).reduce((acc, curr) => acc + info[curr].credits, 0);
+        console.log(credits);
+        
+        let color = "gray";
+        if(credits < 12) color = "red";
+        else if(credits <= 18) color = "green";
+        else if(credits <= 22) color = "yellow";
+
+        setColor(color);
+    }, [currentTerm, info, coursesMap.get(currentTerm?.id || "")]);
+
 
     const show = sideBar === SIDEBAR.COURSES;
     const display = sideBar === SIDEBAR.COURSES;
@@ -307,6 +323,8 @@ const SideBar = ({
                     </div>
                 </Dialog>
             </Transition>
+
+            
             <div 
                 className="h-full border border-sky-300/50 absolute z-[9999] resize-x"
                 style={{right: show ? '75vw' : '98.5vw', transition: 'all 0.3s ease-in-out', cursor: show ? 'ew-resize' : 'auto'}}
@@ -341,30 +359,31 @@ const SideBar = ({
                     </div>
                 </div>
                 <div
-                    className="w-[21vw]"
+                    className="w-[21vw] overflow-hidden"
                     // style={{
                     //     background: `linear-gradient(90deg, #cffafe 21.8px, transparent 1%) center, linear-gradient(#cffafe 21.8px, transparent 1%) center, #000`,
                     //     backgroundSize: "23px 23px",
                     // }}
                 >
                     <div className="w-full flex flex-row bg-cyan-800 items-center relative">
-                        <div className="w-full mx-auto pb-2 h-20 border-0 border-cyan-70 0 flex flex-col justify-center items-center round ed font-bold font-Poppins text-2xl">
+                        <div className="w-full mx-auto h-24 border-0 border-cyan-70 0 flex flex-col justify-end items-center round ed font-bold font-Poppins text-2xl">
                             <p>
                                 {currentTerm.type + " " + currentTerm.year}
                             </p>
-                            <div className="flex flex-row font-JetBrainsMono">
+                            <div className="flex flex-row font-JetBrainsMono pb-4">
                                 <p className="text-sm font-normal">
                                     {coursesMap.get(currentTerm.id)?.length} course{coursesMap.get(currentTerm.id)?.length === 1 ? "" : "s"} / 
                                 </p>
-                                <p className="text-sm font-bold text-green-500">
+                                <p className="text-sm font-bold" style={{color}}>
                                     &nbsp;{coursesMap.get(currentTerm.id)?.reduce((acc, course) => acc + info[course]?.credits, 0)} credits
                                 </p>
                             </div>
+                            <ProgressBar customLabelStyles={{display: 'none'}} completed={`${coursesMap.get(currentTerm.id)?.reduce((acc, course) => acc + info[course]?.credits, 0)}`} height="10px" borderRadius={'0.25rem 0 0 0'} maxCompleted={22} width="21vw" bgColor={color} />
                         </div>
                         <MenuButton handleClearTerm={handleClearTerm} handleDeleteTerm={handleDeleteTerm}/>
                     </div>
                     <div className="bg-cyan-800 w-full h-1 -z-10">
-                        <div className="bg-white rounded-tl h-2">
+                        <div className="bg-white roun ded-tl h-2">
                             {/* Total credits: {coursesMap.get(currentTerm.id)?.reduce((acc, course) => acc + info[course]?.credits, 0)} */}
                         </div>
                     </div>
