@@ -1,14 +1,13 @@
-import { Fragment, MouseEventHandler, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 import { useCourses } from "../../hooks/useCourses";
 import { SIDEBAR } from "../../types/SideBar";
 import { TERMS } from "../../types/Terms";
 import Droppable from "../Droppable";
-import { removeCourse } from "../../utils/bridge";
+import { removeCourse, addTerm, deleteTerm, removeTermCourses } from "../../utils/bridge";
 import useSupabase from "../../hooks/useSupabase";
 import { Dialog, Transition } from "@headlessui/react";
 import { LeafIcon, SnowIcon, SunIcon } from "../icons";
 import { toast } from "react-toastify";
-import { addTerm } from "../../utils/bridge";
 import { useRouter } from "next/router";
 import MenuButton from "./MenuButton";
 import ProgressBar from "@ramonak/react-progress-bar";
@@ -112,14 +111,23 @@ const SideBar = ({
         setCurrentTerm(term as {type: TERMS, year: string, id: string});
     }
 
-    const handleDelete = async (courseCode: string) => {
+    const handleDelete = async (courseCode: string, removeSupa?: boolean) => {
         delete used[courseCode];
         setUsed(used);
-        removeCourse(currentTerm.id, courseCode, supabase);
+        // undefined or false means remove from supabase
+        if(!removeSupa) removeCourse(currentTerm.id, courseCode, supabase);
         coursesMap.set(currentTerm.id, coursesMap.get(currentTerm.id)!.filter(c => c !== courseCode));
         setMap(coursesMap);
         setTerms({...terms});
     }
+
+    const handleDeleteBatch = async (courseCodes: string[]) => {
+        courseCodes.forEach(courseCode => {
+            handleDelete(courseCode, true);
+        });
+        removeTermCourses(currentTerm.id, supabase);
+    };
+
 
     const closeModal = () => {
         setIsOpen(false);
@@ -129,25 +137,27 @@ const SideBar = ({
         setIsOpen(true);
     }
 
-    const getNextTerm = (type: string, year: string) => {
+    const getNextTerm = (type: TERMS, year: string) => {
         const yearPlus = (parseInt(year) + 1).toString();
         if(type === "Fall" && Object.values(terms).every(t => t.type !== "Spring" || t.year !== yearPlus)) {
-            return [{type: "Spring", year: yearPlus}];
+            return [{type: TERMS.SPRING, year: yearPlus}];
         }
         if(type === "Spring") {
             const ret = [];
             if(Object.values(terms).every(t => t.type !== "Fall" || t.year !== year)) {
-                ret.push({type: "Fall", year});
+                ret.push({type: TERMS.FALL, year});
             }
             if(Object.values(terms).every(t => t.type !== "Summer" || t.year !== year)) {
-                ret.push({type: "Summer", year});
+                ret.push({type: TERMS.SUMMER, year});
             }
             return ret;
         }
         return [];
     }
 
-    const handleAddTerm = async (termType: string, termYear: string) => {
+    
+
+    const handleAddTerm = async (termType: TERMS, termYear: string) => {
         closeModal();
         const term = Object.keys(terms).length === 0 ?
             {
@@ -172,13 +182,62 @@ const SideBar = ({
                         }
                         return parseInt(temp[a].year) - parseInt(temp[b].year)
                     })
-                    .reduce((r: {[key: string]: { type: string, year: string }},k)=>(r[k]=temp[k],r),{})
+                    .reduce((r: {[key: string]: { type: TERMS, year: string }},k)=>(r[k]=temp[k],r),{})
             );
             
         } else {
             toast.error("Error adding term. Please try again later.");
         }
     }
+
+    const handleClearTerm = async () => {
+        // get course codes of the current term
+        const courseCodes = coursesMap.get(currentTerm.id) || [];
+        courseCodes.forEach(course => {
+            handleDelete(course);
+        });
+        removeTermCourses(currentTerm.id, supabase);
+    }
+
+    const handleDeleteTerm = async () => {
+        if(currentTerm.type === majorMinor.term.type && currentTerm.year === majorMinor.term.year) {
+            // TODO: add trigger to supabase to prevent deleting the starting term
+            toast.error("You can't delete the starting term.");
+            return;
+        }
+        if(Object.keys(terms).length === 1) {
+            toast.error("You can't delete the only term.");
+            return;
+        }
+
+        handleDeleteBatch(coursesMap.get(currentTerm.id) || []);
+        
+        const { success } = await deleteTerm(currentTerm.id, supabase);
+        if(success) {
+            const temp = {...terms};
+            const termIndex = Object.keys(terms).indexOf(currentTerm.id);
+            delete temp[currentTerm.id];
+            setTerms(temp);
+            coursesMap.delete(currentTerm.id);
+            setMap(coursesMap);
+            setCurrentTerm(
+                termIndex === 0 ?
+                    {
+                        type: temp[Object.keys(temp)[0]].type,
+                        year: temp[Object.keys(temp)[0]].year,
+                        id: Object.keys(temp)[0]
+                    } :
+                    {
+                        type: temp[Object.keys(temp)[termIndex - 1]].type,
+                        year: temp[Object.keys(temp)[termIndex - 1]].year,
+                        id: Object.keys(temp)[termIndex - 1]
+                    }
+            );
+        } else {
+            toast.error("Error deleting term. Please try again later.");
+        }
+    }
+
     
     return (
         <div className="h-[calc(100vh-4rem)] absolute">
@@ -321,7 +380,7 @@ const SideBar = ({
                             </div>
                             <ProgressBar customLabelStyles={{display: 'none'}} completed={`${coursesMap.get(currentTerm.id)?.reduce((acc, course) => acc + info[course]?.credits, 0)}`} height="10px" borderRadius={'0.25rem 0 0 0'} maxCompleted={22} width="21vw" bgColor={color} />
                         </div>
-                        <MenuButton />
+                        <MenuButton handleClearTerm={handleClearTerm} handleDeleteTerm={handleDeleteTerm}/>
                     </div>
                     <div className="bg-cyan-800 w-full h-1 -z-10">
                         <div className="bg-white roun ded-tl h-2">

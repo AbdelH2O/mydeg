@@ -9,7 +9,7 @@ const msalConfig: Configuration = {
     auth: {
         clientId: process.env.NEXT_PUBLIC_MSAL_CLIENT_ID || "",
         redirectUri: `${
-            process.env.NEXT_PUBLIC_MSAL_REDIRECT_URI || (typeof window !== "undefined" ? window.location.origin : "")
+            process.env.NEXT_PUBLIC_MSAL_REDIRECT_URI
         }/login`,
         authority: process.env.NEXT_PUBLIC_MSAL_AUTHORITY || "",
     },
@@ -19,6 +19,7 @@ const msalConfig: Configuration = {
         secureCookies: true,
     },
 };
+
 
 const msalApp = new PublicClientApplication(msalConfig);
 
