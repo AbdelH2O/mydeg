@@ -20,6 +20,7 @@ const msalConfig: Configuration = {
     },
 };
 
+
 const msalApp = new PublicClientApplication(msalConfig);
 
 const scopes = ["user.read", "email", "openid", "profile"];
