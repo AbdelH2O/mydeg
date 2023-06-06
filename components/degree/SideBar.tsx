@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useCourses } from "../../hooks/useCourses";
 import { SIDEBAR } from "../../types/SideBar";
 import { TERMS } from "../../types/Terms";
@@ -80,11 +80,11 @@ const SideBar = ({
         
         let color = "gray";
         if(credits < 12) color = "red";
-        else if(credits < 15) color = "green";
-        else if(credits < 18) color = "yellow";
+        else if(credits <= 18) color = "green";
+        else if(credits <= 22) color = "yellow";
 
         setColor(color);
-    }, [currentTerm, info, coursesMap]);
+    }, [currentTerm, info, coursesMap.get(currentTerm?.id || "")]);
 
 
     const show = sideBar === SIDEBAR.COURSES;
