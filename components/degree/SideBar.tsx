@@ -249,6 +249,7 @@ const SideBar = ({
                     </div>
                 </Dialog>
             </Transition>
+            
             <div 
                 className="h-full border border-sky-300/50 absolute z-[9999] resize-x"
                 style={{right: show ? '75vw' : '98.5vw', transition: 'all 0.3s ease-in-out', cursor: show ? 'ew-resize' : 'auto'}}
