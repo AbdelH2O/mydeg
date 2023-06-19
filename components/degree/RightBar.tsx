@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useCourses } from "../../hooks/useCourses";
 import { SIDEBAR } from "../../types/SideBar";
 import { Tab, RadioGroup } from "@headlessui/react";
-import { CheckIcon, Search } from "../icons";
+import { CheckIcon, Search, XMarkIcon } from "../icons";
 import { Edge, MarkerType } from "reactflow";
 import { removeCourse, setSelected } from "../../utils/bridge";
 import useSupabase from "../../hooks/useSupabase";
@@ -33,6 +33,7 @@ const RightBar = () => {
 	const { id } = useRouter().query;
 	const {
 		sideBar,
+		setSideBar,
 		setUsed,
 		map,
 		setMap,
@@ -243,6 +244,11 @@ const RightBar = () => {
 			return;
 		}
 	};
+
+	const handleClose = () => {
+		setSideBar(SIDEBAR.NONE);
+	};
+
 	return (
 		<div className="h-[calc(100vh-4rem)] absolute">
 			<div
@@ -264,7 +270,7 @@ const RightBar = () => {
 			>
 				<div className="flex flex-col h-full text-black">
 					<Tab.Group selectedIndex={index} onChange={setIndex}>
-						<div className="flex flex-row justify-center items-center px-4 py-3 transition-colors shadow-md font-Raleway bg-green-pea">
+						<div className="flex flex-row justify-between items-center px-4 py-3 transition-colors shadow-md font-Raleway bg-green-pea">
 							{/* <div className="flex flex-row justify-center items-center px-4 py-3 transition-colors shadow-md font-Poppins bg-cyan-800"> */}
 							<Tab.List className="flex flex-row space-x-4">
 								<Tab
@@ -298,6 +304,12 @@ const RightBar = () => {
 								)}
 								{/* <Tab className={({ selected }) => `text-md select-none h-full py-2 rounded px-3 ${selected ? 'bg-white font-bold text-cyan-900' : 'hover:bg-cyan-600 hover:text-white transition-colors font-bold text-cyan-200'}`}>Corequisites</Tab> */}
 							</Tab.List>
+							<button
+								onClick={handleClose}
+								className=" inline-flex items-center justify-center rounded-md bg-dark-green p-2 text-gray-200 hover:bg-mid-green hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
+							>
+								<XMarkIcon />
+							</button>
 							{/* <div className="text-lg font-bold text-cyan-900">Course Info</div> */}
 						</div>
 						{/* HACK: forcibly making tailwind import the classes for the chips to work*/}
