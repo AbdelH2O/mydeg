@@ -13,21 +13,25 @@ export interface Database {
         Row: {
           code: string
           credits: number
+          description: string | null
           name: string
           prerequisites_misc: string[]
         }
         Insert: {
           code: string
           credits: number
+          description?: string | null
           name: string
           prerequisites_misc?: string[]
         }
         Update: {
           code?: string
           credits?: number
+          description?: string | null
           name?: string
           prerequisites_misc?: string[]
         }
+        Relationships: []
       }
       Course_Course: {
         Row: {
@@ -51,6 +55,20 @@ export interface Database {
           requisite?: string
           type?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "Course_Course_course_fkey"
+            columns: ["course"]
+            referencedRelation: "Course"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "Course_Course_requisite_fkey"
+            columns: ["requisite"]
+            referencedRelation: "Course"
+            referencedColumns: ["code"]
+          }
+        ]
       }
       Degree: {
         Row: {
@@ -89,6 +107,26 @@ export interface Database {
           start?: number
           year?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "Degree_major_fkey"
+            columns: ["major"]
+            referencedRelation: "Majors"
+            referencedColumns: ["name"]
+          },
+          {
+            foreignKeyName: "Degree_minor_fkey"
+            columns: ["minor"]
+            referencedRelation: "Majors"
+            referencedColumns: ["name"]
+          },
+          {
+            foreignKeyName: "Degree_special_fkey"
+            columns: ["special"]
+            referencedRelation: "Majors"
+            referencedColumns: ["name"]
+          }
+        ]
       }
       Degree_Term: {
         Row: {
@@ -112,6 +150,14 @@ export interface Database {
           type?: string
           year?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "Degree_Term_degree_fkey"
+            columns: ["degree"]
+            referencedRelation: "Degree"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       Degree_Term_Course: {
         Row: {
@@ -129,6 +175,20 @@ export interface Database {
           id?: number
           term?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "Degree_Term_Course_course_fkey"
+            columns: ["course"]
+            referencedRelation: "Course"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "Degree_Term_Course_term_fkey"
+            columns: ["term"]
+            referencedRelation: "Degree_Term"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       Major_Course: {
         Row: {
@@ -161,38 +221,20 @@ export interface Database {
           x?: number
           y?: number
         }
-      }
-      Major_Course_GE: {
-        Row: {
-          color: string | null
-          course: string | null
-          group: string | null
-          id: number
-          major: string | null
-          parent: string | null
-          x: string | null
-          y: string | null
-        }
-        Insert: {
-          color?: string | null
-          course?: string | null
-          group?: string | null
-          id?: number
-          major?: string | null
-          parent?: string | null
-          x?: string | null
-          y?: string | null
-        }
-        Update: {
-          color?: string | null
-          course?: string | null
-          group?: string | null
-          id?: number
-          major?: string | null
-          parent?: string | null
-          x?: string | null
-          y?: string | null
-        }
+        Relationships: [
+          {
+            foreignKeyName: "Major_Course_course_fkey"
+            columns: ["course"]
+            referencedRelation: "Course"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "Major_Course_major_fkey"
+            columns: ["major"]
+            referencedRelation: "Majors"
+            referencedColumns: ["name"]
+          }
+        ]
       }
       Major_Course_Selected: {
         Row: {
@@ -213,6 +255,20 @@ export interface Database {
           id?: number
           parent?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "Major_Course_Selected_course_fkey"
+            columns: ["course"]
+            referencedRelation: "Course"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "Major_Course_Selected_degree_fkey"
+            columns: ["degree"]
+            referencedRelation: "Degree"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       Majors: {
         Row: {
@@ -230,6 +286,7 @@ export interface Database {
           name?: string
           type?: string
         }
+        Relationships: []
       }
       Professor: {
         Row: {
@@ -247,6 +304,7 @@ export interface Database {
           name?: string
           rating?: number
         }
+        Relationships: []
       }
       Section: {
         Row: {
@@ -279,6 +337,20 @@ export interface Database {
           start_time?: string
           term?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "Section_course_fkey"
+            columns: ["course"]
+            referencedRelation: "Course"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "Section_professor_fkey"
+            columns: ["professor"]
+            referencedRelation: "Professor"
+            referencedColumns: ["name"]
+          }
+        ]
       }
       Single_Term: {
         Row: {
@@ -311,6 +383,20 @@ export interface Database {
           minor?: string | null
           term?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "Single_Term_major_fkey"
+            columns: ["major"]
+            referencedRelation: "Majors"
+            referencedColumns: ["name"]
+          },
+          {
+            foreignKeyName: "Single_Term_minor_fkey"
+            columns: ["minor"]
+            referencedRelation: "Majors"
+            referencedColumns: ["name"]
+          }
+        ]
       }
       Single_Term_Section: {
         Row: {
@@ -328,6 +414,20 @@ export interface Database {
           section?: string
           term?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "Single_Term_Section_section_fkey"
+            columns: ["section"]
+            referencedRelation: "Section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Single_Term_Section_term_fkey"
+            columns: ["term"]
+            referencedRelation: "Single_Term"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {
@@ -337,6 +437,9 @@ export interface Database {
       [_ in never]: never
     }
     Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
       [_ in never]: never
     }
   }
