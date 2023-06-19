@@ -8,12 +8,13 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../hooks/useAuth";
 import { MsalProvider } from "@azure/msal-react";
+import { env } from "../../utils/env";
 
 const msalConfig: Configuration = {
 	auth: {
-		clientId: process.env.NEXT_PUBLIC_MSAL_CLIENT_ID || "",
-		redirectUri: `${process.env.NEXT_PUBLIC_MSAL_REDIRECT_URI}/login`,
-		authority: process.env.NEXT_PUBLIC_MSAL_AUTHORITY || "",
+		clientId: env.NEXT_PUBLIC_MSAL_CLIENT_ID,
+		redirectUri: `${env.NEXT_PUBLIC_MSAL_REDIRECT_URI}/login`,
+		authority: env.NEXT_PUBLIC_MSAL_AUTHORITY,
 	},
 	cache: {
 		cacheLocation: "localStorage",
